@@ -94,3 +94,9 @@ export const SIGNAL_TYPES = {
 } as const;
 
 export type SignalTypes = typeof SIGNAL_TYPES[keyof typeof SIGNAL_TYPES];
+
+export const ENVIRONMENT_TYPES = {
+  DEVELOPMENT: 'development',
+  PRODUCTION: 'production',
+  TEST: 'test',
+} as const;
