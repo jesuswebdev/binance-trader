@@ -6,6 +6,8 @@
   "scripts": {
     "typeorm": "typeorm-ts-node-esm",
     "migration:create": "npm run typeorm migration:create  ./src/migrations/migration",
+    "migrate": "npm run typeorm migration:run -- --dataSource ./src/config/data-source.ts",
+    "migration:revert": "npm run typeorm migration:revert -- --dataSource ./src/config/data-source.ts",
     "start:dev": "ts-node ./src/index"
   },
   "keywords": [],
@@ -26,7 +28,7 @@
     "dotenv": "^16.0.1",
     "joi": "^17.6.0",
     "mysql2": "^2.3.3",
-    "nanoid": "^4.0.0",
+    "nanoid": "^3.3.4",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "typeorm": "^0.3.6"
