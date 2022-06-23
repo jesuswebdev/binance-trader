@@ -15,7 +15,8 @@ const env = validateObjectSchema(
   joi.object({
     HOST: joi.string().trim().hostname().default('0.0.0.0'),
     PORT: joi.number().port().default(8080),
-    INTERVAL: joi.string().trim().required(),
+    CANDLE_INTERVAL: joi.string().trim().required(),
+    DATABASE_PROTOCOL: joi.string().trim().required(),
     DATABASE_HOST: joi.string().trim().hostname().required(),
     DATABASE_PORT: joi.number().port().required(),
     DATABASE_USERNAME: joi.string().trim().required(),
@@ -34,12 +35,14 @@ export const ENVIRONMENT =
   process.env.NODE_ENV ?? ENVIRONMENT_TYPES.DEVELOPMENT;
 export const HOST = env.HOST ?? '';
 export const PORT = +(env.PORT ?? 0);
-export const INTERVAL = env.INTERVAL ?? '';
+export const CANDLE_INTERVAL = env.CANDLE_INTERVAL ?? '';
+export const DATABASE_PROTOCOL = env.DATABASE_PROTOCOL ?? '';
 export const DATABASE_HOST = env.DATABASE_HOST ?? '';
 export const DATABASE_PORT = +(env.DATABASE_PORT ?? 0);
 export const DATABASE_USERNAME = env.DATABASE_USERNAME ?? '';
 export const DATABASE_PASSWORD = env.DATABASE_PASSWORD ?? '';
 export const DATABASE_NAME = env.DATABASE_NAME ?? '';
+export const DATABASE_URI = `${DATABASE_PROTOCOL}://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}`;
 export const BINANCE_STREAM_URI = env.BINANCE_STREAM_URI ?? '';
 export const MESSAGE_BROKER_URI =
   `${env.MESSAGE_BROKER_PROTOCOL}://${env.MESSAGE_BROKER_USER}:${env.MESSAGE_BROKER_PASSWORD}@${env.MESSAGE_BROKER_HOST}` ??

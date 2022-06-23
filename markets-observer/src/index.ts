@@ -1,21 +1,31 @@
-import 'reflect-metadata';
-import { INTERVAL } from './config';
-import { AppDataSource } from './config/data-source';
-import Market from './entity/symbol/model';
+import {
+  DATABASE_MODELS,
+  LeanMarketDocument,
+  MarketModel,
+} from '@binance-trader/shared';
+import { CANDLE_INTERVAL } from './config';
+import { initDb } from './config/database';
 import { Observer } from './observer';
 
 const start = async () => {
-  const connection = await AppDataSource.initialize();
+  const db = await initDb();
 
-  const markets = await connection
-    .getRepository(Market)
-    .find({ select: ['symbol', 'base_asset', 'quote_asset'] });
+  const marketModel: MarketModel = db.model(DATABASE_MODELS.MARKET);
 
-  await connection.destroy();
+  const markets: LeanMarketDocument[] = await marketModel
+    .find()
+    .select({ symbol: true })
+    .lean();
 
-  const observer = new Observer({ markets, interval: INTERVAL });
+  await db.destroy();
 
-  observer.init();
+  if (markets.length > 0) {
+    const observer = new Observer({ markets, interval: CANDLE_INTERVAL });
+
+    observer.init();
+  } else {
+    console.log('No markets found');
+  }
 };
 
 start();

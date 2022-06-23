@@ -100,3 +100,15 @@ export const ENVIRONMENT_TYPES = {
   PRODUCTION: 'production',
   TEST: 'test',
 } as const;
+
+export const DATABASE_MODELS = {
+  ACCOUNT: 'Account',
+  CANDLE: 'Candle',
+  MARKET: 'Market',
+  ORDER: 'Order',
+  POSITION: 'Position',
+  SIGNAL: 'Signal',
+} as const;
+
+export type DatabaseModels =
+  typeof DATABASE_MODELS[keyof typeof DATABASE_MODELS];

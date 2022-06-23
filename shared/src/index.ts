@@ -29,7 +29,7 @@ export const validateObjectSchema = function validateObjectSchema<T>(
 export const numberSchemaValidation = function numberSchemaValidation(
   n: number,
 ) {
-  return n === null || (typeof n === 'number' && !isNaN(n) && !isFinite(n));
+  return n === null || (typeof n === 'number' && !isNaN(n) && isFinite(n));
 };
 
 /**
