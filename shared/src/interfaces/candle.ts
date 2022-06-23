@@ -1,3 +1,5 @@
+import { Document, Types, LeanDocument, Model } from 'mongoose';
+
 export interface CandleTickData {
   id: string;
   symbol: string;
@@ -39,3 +41,16 @@ export interface CandleAttributes extends CandleTickData {
   volume_trend: number;
   ema_50_slope: number;
 }
+
+export interface CandleDocument extends Document, CandleAttributes {
+  id: string;
+  _id: Types.ObjectId;
+}
+
+export interface LeanCandleDocument extends LeanDocument<CandleAttributes> {
+  _id: string;
+  __v: number;
+}
+
+// eslint-disable-next-line
+export interface CandleModel extends Model<CandleDocument> {}

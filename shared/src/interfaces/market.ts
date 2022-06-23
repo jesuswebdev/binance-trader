@@ -1,5 +1,6 @@
+import { Document, Types, LeanDocument, Model } from 'mongoose';
+
 export interface MarketAttributes {
-  id: number;
   base_asset: string;
   quote_asset: string;
   price_tick_size: number;
@@ -11,3 +12,15 @@ export interface MarketAttributes {
   enabled: boolean;
   use_test_account: boolean;
 }
+
+export interface MarketDocument extends Document, MarketAttributes {
+  _id: Types.ObjectId;
+}
+
+export interface LeanMarketDocument extends LeanDocument<MarketAttributes> {
+  _id: string;
+  __v: number;
+}
+
+// eslint-disable-next-line
+export interface MarketModel extends Model<MarketDocument> {}
