@@ -6,7 +6,7 @@ import {
   ENVIRONMENT_TYPES,
 } from '@binance-trader/shared';
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== ENVIRONMENT_TYPES.PRODUCTION) {
   dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 }
 
