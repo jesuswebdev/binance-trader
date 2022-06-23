@@ -4,8 +4,6 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "typeorm": "typeorm-ts-node-esm",
-    "migration:create": "npm run typeorm migration:create  ./src/migrations/migration",
     "start:dev": "ts-node ./src/index"
   },
   "keywords": [],
