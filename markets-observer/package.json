@@ -4,7 +4,9 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "start:dev": "ts-node ./src/index"
+    "start": "node ./build/index.js",
+    "start:dev": "ts-node ./src/index",
+    "build": "rimraf build && tsc"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +23,7 @@
     "@binance-trader/shared": "file:../shared",
     "dotenv": "^16.0.1",
     "joi": "^17.6.0",
-    "mongoose": "^6.4.0",
+    "rimraf": "^3.0.2",
     "ws": "^8.8.0"
   }
 }

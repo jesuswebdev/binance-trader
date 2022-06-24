@@ -1,6 +1,7 @@
 import mongoose, { SchemaOptions } from 'mongoose';
 import { numberSchemaValidation } from '../index';
 import { MarketAttributes } from '../interfaces';
+import { PAIRS } from '../';
 
 export const createMarketSchema = function createMarketSchema(
   options: SchemaOptions = {},
@@ -10,6 +11,7 @@ export const createMarketSchema = function createMarketSchema(
       symbol: {
         type: String,
         required: true,
+        validate: (value: string) => PAIRS.map((p) => p.symbol).includes(value),
       },
       base_asset: { type: String },
       quote_asset: { type: String },

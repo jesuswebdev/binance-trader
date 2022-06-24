@@ -4,18 +4,18 @@ import {
   MessageBroker,
   EXCHANGE_TYPES,
   CANDLE_EVENTS,
-  LeanMarketDocument,
+  Pair,
 } from '@binance-trader/shared';
 import { KlineUpdateEvent } from './utils/interfaces';
 import { BINANCE_STREAM_URI, MESSAGE_BROKER_URI } from './config';
 
 interface constructorOptions {
-  markets: LeanMarketDocument[];
+  markets: Pair[];
   interval: string;
 }
 
 class Observer {
-  private markets: LeanMarketDocument[];
+  private markets: Pair[];
   private interval: string;
   private client: WebSocket | null;
   private websocketId: number;
