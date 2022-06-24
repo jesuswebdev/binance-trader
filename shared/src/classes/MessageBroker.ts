@@ -20,7 +20,8 @@ export interface OnMessageHandler<T> {
   (data: T, msg: ConsumeMessage): Promise<void> | void;
 }
 
-export class MessageBroker<T> {
+// eslint-disable-next-line
+export class MessageBroker<T = any> {
   private readonly uri: string;
   private readonly exchange: string;
   private readonly exchangeType: MessageBrokerExchangeTypes;

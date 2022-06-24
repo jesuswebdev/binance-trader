@@ -160,3 +160,10 @@ export const getBooleanValue = function getBooleanValue(
 
   return false;
 };
+
+export const getChange = function getChange(
+  currentValue: number,
+  fromValue: number,
+): number {
+  return +((currentValue * 100) / fromValue - 100).toFixed(2);
+};
