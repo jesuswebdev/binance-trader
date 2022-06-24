@@ -1,5 +1,9 @@
 import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
 import {
+  MessageBrokerExchangeTypes,
+  MESSAGE_BROKER_EXCHANGE_TYPES,
+} from '../constants';
+import {
   MessageBrokerAssertQueueOptions,
   MessageBrokerPublishOptions,
 } from '../interfaces';
@@ -8,6 +12,7 @@ interface MessageBrokerConstructorOptions {
   uri: string;
   exchange: string;
   queue?: string;
+  exchangeType?: MessageBrokerExchangeTypes;
   autoAck?: boolean;
 }
 
@@ -18,6 +23,7 @@ export interface OnMessageHandler<T> {
 export class MessageBroker<T> {
   private readonly uri: string;
   private readonly exchange: string;
+  private readonly exchangeType: MessageBrokerExchangeTypes;
   private readonly queue: string | undefined;
   private connection: Connection | undefined;
   private channel: Channel | undefined;
@@ -26,6 +32,8 @@ export class MessageBroker<T> {
     this.uri = options.uri;
     this.exchange = options.exchange;
     this.queue = options.queue;
+    this.exchangeType =
+      options.exchangeType ?? MESSAGE_BROKER_EXCHANGE_TYPES.TOPIC;
   }
 
   async initializeConnection() {
@@ -40,7 +48,9 @@ export class MessageBroker<T> {
     const connection = await connect(this.uri);
 
     const channel = await connection.createChannel();
-    await channel.assertExchange(this.exchange, 'topic', { durable: true });
+    await channel.assertExchange(this.exchange, this.exchangeType, {
+      durable: true,
+    });
 
     this.connection = connection;
     this.channel = channel;

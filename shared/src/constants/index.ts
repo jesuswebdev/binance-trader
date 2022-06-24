@@ -1,10 +1,19 @@
 export const EXCHANGE_TYPES = {
-  CANDLE_EVENTS: 'CANDLE_EVENTS',
-  POSITION_EVENTS: 'POSITION_EVENTS',
-  SIGNAL_EVENTS: 'SIGNAL_EVENTS',
+  MAIN: 'BINANCE_TRADER_MAIN_EXCHANGE',
+  DEAD_LETTER: 'BINANCE_TRADER_DEAD_LETTER_EXCHANGE',
 } as const;
 
 export type ExchangeTypes = typeof EXCHANGE_TYPES[keyof typeof EXCHANGE_TYPES];
+
+export const MESSAGE_BROKER_EXCHANGE_TYPES = {
+  FANOUT: 'fanout',
+  TOPIC: 'topic',
+  DIRECT: 'direct',
+  HEADERS: 'headers',
+} as const;
+
+export type MessageBrokerExchangeTypes =
+  typeof MESSAGE_BROKER_EXCHANGE_TYPES[keyof typeof MESSAGE_BROKER_EXCHANGE_TYPES];
 
 export const CANDLE_EVENTS = {
   CANDLE_TICK: 'candle.tick',
