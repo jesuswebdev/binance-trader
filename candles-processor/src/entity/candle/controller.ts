@@ -54,7 +54,6 @@ export const processCandleTick = async function processCandleTick({
   database,
   candle,
 }: ProcessCandleTickProps) {
-  // const redis = server.plugins.redis.client;
   const processCandlesInterval = PROCESS_CANDLES_INTERVAL;
 
   const candleModel: CandleModel = database.model(DATABASE_MODELS.CANDLE);

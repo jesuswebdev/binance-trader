@@ -4,6 +4,7 @@ import joi from 'joi';
 import {
   validateObjectSchema,
   ENVIRONMENT_TYPES,
+  MILLISECONDS,
 } from '@binance-trader/shared';
 
 if (process.env.NODE_ENV !== ENVIRONMENT_TYPES.PRODUCTION) {
@@ -49,7 +50,8 @@ export const MESSAGE_BROKER_URI =
   `${env.MESSAGE_BROKER_PROTOCOL}://${env.MESSAGE_BROKER_USER}:${env.MESSAGE_BROKER_PASSWORD}@${env.MESSAGE_BROKER_HOST}` ??
   '';
 export const REDIS_URI = `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`;
-export const PROCESS_CANDLES_INTERVAL = +(env.PROCESS_CANDLES_INTERVAL ?? 0);
+export const PROCESS_CANDLES_INTERVAL =
+  +(env.PROCESS_CANDLES_INTERVAL ?? 0) * MILLISECONDS.SECOND;
 export const BINANCE_API_URL = env.BINANCE_API_URL ?? '';
 export const BINANCE_API_KEY = env.BINANCE_API_KEY ?? '';
 export const BINANCE_API_SECRET = env.BINANCE_API_SECRET ?? '';
