@@ -20,8 +20,6 @@ import {
 } from './entity/candle/controller';
 
 const start = async () => {
-  const db = await initDb();
-  const redis = await initRedis();
   const binance = getBinanceInstance({
     apiUrl: BINANCE_API_URL,
     apiKey: BINANCE_API_KEY,
@@ -34,7 +32,11 @@ const start = async () => {
     queue: 'candles-processor',
   });
 
-  await broker.initializeConnection();
+  const [db, redis] = await Promise.all([
+    initDb(),
+    initRedis(),
+    broker.initializeConnection(),
+  ]);
 
   const msgHandler = async (data: CandleTickData) => {
     const candles = await processCandleTick({
