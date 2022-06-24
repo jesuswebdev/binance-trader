@@ -11,7 +11,7 @@ interface MessageBrokerConstructorOptions {
   autoAck?: boolean;
 }
 
-interface OnMessageHandler<T> {
+export interface OnMessageHandler<T> {
   (data: T, msg: ConsumeMessage): Promise<void> | void;
 }
 

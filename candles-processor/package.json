@@ -2,16 +2,30 @@
   "name": "candles-processor",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node build/index.js",
+    "start:dev": "ts-node ./src/index",
+    "build": "rimraf build && tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^5.29.0",
     "@typescript-eslint/parser": "^5.29.0",
-    "eslint": "^8.18.0"
+    "axios": "^0.27.2",
+    "eslint": "^8.18.0",
+    "ts-node": "^10.8.1"
+  },
+  "dependencies": {
+    "@binance-trader/shared": "file:../shared",
+    "dotenv": "^16.0.1",
+    "joi": "^17.6.0",
+    "mongoose": "^6.4.0",
+    "redis": "^4.1.0",
+    "rimraf": "^3.0.2",
+    "tulind": "^0.8.20"
   }
 }
