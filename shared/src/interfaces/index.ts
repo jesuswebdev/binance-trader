@@ -1,5 +1,6 @@
 export * from './candle';
 export * from './market';
+export * from './position';
 
 export interface MessageBrokerPublishOptions {
   expiration?: string | number | undefined;
