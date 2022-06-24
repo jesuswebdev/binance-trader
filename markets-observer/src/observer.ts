@@ -101,7 +101,7 @@ class Observer {
     console.log(`Markets Observer started at ${new Date().toUTCString()}`);
 
     this.broker = new MessageBroker<CandleTickData>({
-      exchange: EXCHANGE_TYPES.CANDLE_EVENTS,
+      exchange: EXCHANGE_TYPES.MAIN,
       uri: MESSAGE_BROKER_URI,
     });
 

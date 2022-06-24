@@ -27,7 +27,7 @@ const start = async () => {
   });
 
   const broker = new MessageBroker<CandleTickData>({
-    exchange: EXCHANGE_TYPES.CANDLE_EVENTS,
+    exchange: EXCHANGE_TYPES.MAIN,
     uri: MESSAGE_BROKER_URI,
     queue: 'candles-processor',
   });
