@@ -1,6 +1,7 @@
 export * from './candle';
 export * from './market';
 export * from './position';
+export * from './signal';
 
 export interface MessageBrokerPublishOptions {
   expiration?: string | number | undefined;
@@ -37,4 +38,8 @@ export interface MessageBrokerAssertQueueOptions {
   deadLetterRoutingKey?: string | undefined;
   maxLength?: number | undefined;
   maxPriority?: number | undefined;
+}
+
+export interface MongoError {
+  code: number;
 }
