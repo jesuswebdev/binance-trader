@@ -1,43 +1,58 @@
 import {
+  AccountModel,
+  BinanceOrderTypes,
   BINANCE_ORDER_STATUS,
   BINANCE_ORDER_TYPES,
   DATABASE_MODELS,
+  LeanAccountDocument,
+  LeanMarketDocument,
   LeanOrderDocument,
+  LeanPositionDocument,
+  MarketModel,
   MessageBroker,
   MILLISECONDS,
   OrderAttributes,
   OrderModel,
   PositionModel,
   POSITION_EVENTS,
+  toSymbolStepPrecision,
 } from '@binance-trader/shared';
 import { AxiosInstance } from 'axios';
 import { Connection } from 'mongoose';
 import {
   BUY_ORDER_TTL,
+  BUY_ORDER_TYPE,
+  DEFAULT_BUY_AMOUNT,
   MINUTES_BETWEEN_CANCEL_ATTEMPTS,
   SELL_ORDER_TTL,
 } from '../../config';
 import { parseOrder } from '../../utils';
 
-// const MAX_REQUESTS = 48; // limit 50
+type ServicesProps = {
+  database: Connection;
+  binance: AxiosInstance;
+  broker: MessageBroker;
+};
 
-// export const checkHeaders = async function checkHeaders(
-//   headers: Record<string, string>,
-//   model: AccountModel,
-// ) {
-//   if (+headers['x-mbx-order-count-10s'] >= MAX_REQUESTS) {
-//     await model
-//       .updateOne(
-//         { id: process.env.NODE_ENV },
-//         { $set: { create_order_after: Date.now() + 1e4 } },
-//       )
-//       .hint('id_1');
-//   }
+const MAX_REQUESTS = 48; // limit 50
 
-//   return;
-// };
+export const checkHeaders = async function checkHeaders(
+  headers: Record<string, string>,
+  model: AccountModel,
+) {
+  if (+headers['x-mbx-order-count-10s'] >= MAX_REQUESTS) {
+    await model
+      .updateOne(
+        { id: process.env.NODE_ENV },
+        { $set: { create_order_after: Date.now() + 1e4 } },
+      )
+      .hint('id_1');
+  }
 
-type GetOrderFromBinanceProps = {
+  return;
+};
+
+type GetOrderFromBinanceProps = Omit<ServicesProps, 'broker'> & {
   database: Connection;
   binance: AxiosInstance;
   order: OrderAttributes;
@@ -76,12 +91,149 @@ export const getOrderFromBinance = async function getOrderFromBinance({
   return updatedOrder;
 };
 
-type CancelUnfilledOrdersProps = {
+type CreateBuyOrderProps = Omit<ServicesProps, 'broker'> & {
   database: Connection;
   binance: AxiosInstance;
-  order: OrderAttributes;
-  broker: MessageBroker;
+  position: LeanPositionDocument;
+  orderType?: BinanceOrderTypes;
 };
+
+export const createBuyOrder = async function createBuyOrder({
+  database,
+  binance,
+  position,
+  orderType,
+}: CreateBuyOrderProps) {
+  const accountModel: AccountModel = database.model(DATABASE_MODELS.ACCOUNT);
+  const positionModel: PositionModel = database.model(DATABASE_MODELS.POSITION);
+  const marketModel: MarketModel = database.model(DATABASE_MODELS.MARKET);
+
+  const account: LeanAccountDocument = await accountModel
+    .findOne({ id: process.env.NODE_ENV })
+    .hint('id_1')
+    .lean();
+
+  if (!account) {
+    console.log(`Account with ID '${process.env.NODE_ENV}' not found.`);
+
+    return;
+  }
+
+  const market: LeanMarketDocument = await marketModel
+    .findOne({ symbol: position.symbol })
+    .select({ enabled: true, trader_lock: true, quote_asset: true })
+    .hint('symbol_1')
+    .lean();
+
+  if (!market.enabled) {
+    console.log(
+      `${position.symbol} | ${position._id} | Market disabled for trading.`,
+    );
+
+    return;
+  }
+
+  const [assetBalance] = account.balances.filter(
+    (balance) => balance.asset === market.quote_asset,
+  );
+
+  const enoughBalance = assetBalance.free > DEFAULT_BUY_AMOUNT;
+  const positionHasBuyOrder = await positionModel.exists({
+    $and: [{ id: position.id }, { 'buy_order.orderId': { $exists: true } }],
+  });
+
+  if (
+    Date.now() < account.create_order_after ||
+    !enoughBalance ||
+    positionHasBuyOrder
+  ) {
+    let reason = '10s order limit reached.';
+
+    if (!enoughBalance) {
+      reason = 'Not enough balance.';
+    }
+
+    if (positionHasBuyOrder) {
+      reason = 'Buy order has already been created for this position';
+    }
+
+    console.log(
+      `${position.symbol} | ${position._id} | Unable to continue. Reason: ${reason}`,
+    );
+
+    return;
+  }
+
+  if (market.trader_lock) {
+    throw new Error(
+      `${position.symbol} | Market lock is set. Unable to continue.`,
+    );
+  }
+
+  await marketModel
+    .updateOne(
+      { symbol: position.symbol },
+      { $set: { trader_lock: true, last_trader_lock_update: Date.now() } },
+    )
+    .hint('symbol_1');
+
+  const query: Record<string, string> = {
+    type: orderType ?? BUY_ORDER_TYPE,
+    symbol: position.symbol,
+    side: 'BUY',
+  };
+
+  if (BUY_ORDER_TYPE === BINANCE_ORDER_TYPES.MARKET) {
+    query.quoteOrderQty = DEFAULT_BUY_AMOUNT.toString();
+  }
+
+  if (BUY_ORDER_TYPE === BINANCE_ORDER_TYPES.LIMIT) {
+    query.timeInForce = 'GTC';
+    query.price = position.buy_price.toString();
+    query.quantity = toSymbolStepPrecision(
+      DEFAULT_BUY_AMOUNT / position.buy_price,
+      position.symbol,
+    ).toString();
+  }
+
+  try {
+    console.log(
+      `${position._id} | Attempting to create order: ${JSON.stringify(query)}`,
+    );
+
+    const searchParams = new URLSearchParams(query).toString();
+
+    const { data, headers } = await binance.post(
+      `/api/v3/order?${searchParams}`,
+    );
+
+    await checkHeaders(headers, accountModel);
+
+    if (data?.orderId) {
+      const createdOrder = {
+        symbol: position.symbol,
+        orderId: data.orderId,
+        clientOrderId: data.clientOrderId,
+      };
+
+      console.log(
+        `${position._id} | Order created: ${JSON.stringify(createdOrder)}`,
+      );
+
+      await positionModel
+        .updateOne({ id: position.id }, { $set: { buy_order: data } })
+        .hint('id_1');
+    }
+  } catch (error: unknown) {
+    console.error(error);
+  } finally {
+    await marketModel
+      .updateOne({ symbol: position.symbol }, { $set: { trader_lock: false } })
+      .hint('symbol_1');
+  }
+};
+
+type CancelUnfilledOrdersProps = ServicesProps;
 
 export const cancelUnfilledOrders = async function cancelUnfilledOrders({
   database,

@@ -5,6 +5,7 @@ import {
   validateObjectSchema,
   ENVIRONMENT_TYPES,
   MILLISECONDS,
+  BINANCE_ORDER_TYPES,
 } from '@binance-trader/shared';
 
 if (process.env.NODE_ENV !== ENVIRONMENT_TYPES.PRODUCTION) {
@@ -36,6 +37,17 @@ const env = validateObjectSchema(
       .positive()
       .greater(0)
       .default(15),
+    BUY_ORDER_TYPE: joi
+      .string()
+      .allow(...Object.values(BINANCE_ORDER_TYPES))
+      .only()
+      .required(),
+    SELL_ORDER_TYPE: joi
+      .string()
+      .allow(...Object.values(BINANCE_ORDER_TYPES))
+      .only()
+      .required(),
+    DEFAULT_BUY_AMOUNT: joi.number().positive().greater(0).required(),
   }),
 );
 
@@ -65,3 +77,7 @@ export const MINUTES_BETWEEN_CANCEL_ATTEMPTS =
 export const BINANCE_API_URL = env.BINANCE_API_URL ?? '';
 export const BINANCE_API_KEY = env.BINANCE_API_KEY ?? '';
 export const BINANCE_API_SECRET = env.BINANCE_API_SECRET ?? '';
+
+export const BUY_ORDER_TYPE = env.BUY_ORDER_TYPE ?? '';
+export const SELL_ORDER_TYPE = env.SELL_ORDER_TYPE ?? '';
+export const DEFAULT_BUY_AMOUNT = +(env.DEFAULT_BUY_AMOUNT ?? 0);
