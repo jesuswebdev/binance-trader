@@ -13,6 +13,10 @@ export const createMarketSchema = function createMarketSchema(
         required: true,
         validate: (value: string) => PAIRS.map((p) => p.symbol).includes(value),
       },
+      quote_asset: { type: String },
+      base_asset: { type: String },
+      price_tick_size: { type: Number, validate: numberSchemaValidation },
+      step_size: { type: Number, validate: numberSchemaValidation },
       enabled: { type: Boolean, default: false },
       use_test_account: { type: Boolean, default: true },
       last_price: {

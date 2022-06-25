@@ -310,6 +310,11 @@ export const fillCandlesData = async function fillCandlesData({
           await marketModel.create({
             symbol,
             last_price: processed[processed.length - 1].close_price,
+            quote_asset: pair.quoteAsset,
+            base_asset: pair.baseAsset,
+            price_tick_size: pair.priceTickSize,
+            step_size: pair.stepSize,
+            enabled: true,
           });
         }
 

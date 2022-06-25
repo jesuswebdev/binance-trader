@@ -9,6 +9,7 @@ export interface MarketAttributes {
   last_price: number;
   trader_lock: boolean;
   last_trader_lock_update: number;
+  /** Enabled for trading */
   enabled: boolean;
   use_test_account: boolean;
 }
