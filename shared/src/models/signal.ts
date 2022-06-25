@@ -43,7 +43,6 @@ export const createSignalSchema = function createSignalSchema(
       position: { type: Schema.Types.ObjectId, ref: DATABASE_MODELS.POSITION },
       broadcast: { type: Boolean, default: false },
       trader_lock: { type: Boolean, default: false },
-      buy_order: { type: Object },
     },
     { timestamps: true, ...options },
   );
