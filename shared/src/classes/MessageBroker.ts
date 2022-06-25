@@ -97,10 +97,13 @@ export class MessageBroker<T = any> {
       throw new Error('onMessage handler is not defined');
     }
 
-    const q = await this.channel?.assertQueue('q_' + this.queue, {
-      durable: true,
-      ...queueOptions,
-    });
+    const q = await this.channel?.assertQueue(
+      'q_' + this.queue + '_' + topic.replace('.', '_'),
+      {
+        durable: true,
+        ...queueOptions,
+      },
+    );
 
     if (!q?.queue) {
       throw new Error('There was an error asserting the queue');
