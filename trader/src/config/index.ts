@@ -6,11 +6,14 @@ import {
   ENVIRONMENT_TYPES,
   MILLISECONDS,
   BINANCE_ORDER_TYPES,
+  PAIRS,
 } from '@binance-trader/shared';
 
 if (process.env.NODE_ENV !== ENVIRONMENT_TYPES.PRODUCTION) {
   dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 }
+
+const QUOTE_ASSETS = [...new Set(PAIRS.map((pair) => pair.quoteAsset))];
 
 const env = validateObjectSchema(
   process.env,
@@ -28,7 +31,6 @@ const env = validateObjectSchema(
     BINANCE_API_URL: joi.string().trim().uri().required(),
     BINANCE_API_KEY: joi.string().trim().base64().required(),
     BINANCE_API_SECRET: joi.string().trim().base64().required(),
-    BINANCE_MINIMUM_ORDER_SIZE: joi.number().positive().greater(0).required(),
     BUY_ORDER_TTL: joi.number().integer().positive().greater(0).default(600),
     SELL_ORDER_TTL: joi.number().integer().positive().greater(0).default(600),
     MINUTES_BETWEEN_CANCEL_ATTEMPTS: joi
@@ -47,7 +49,22 @@ const env = validateObjectSchema(
       .allow(...Object.values(BINANCE_ORDER_TYPES))
       .only()
       .required(),
-    DEFAULT_BUY_AMOUNT: joi.number().positive().greater(0).required(),
+    ...QUOTE_ASSETS.reduce(
+      (acc, quoteAsset) => ({
+        ...acc,
+        [`BINANCE_${quoteAsset}_MINIMUM_ORDER_SIZE`]: joi
+          .number()
+          .positive()
+          .greater(0)
+          .required(),
+        [`DEFAULT_${quoteAsset}_BUY_AMOUNT`]: joi
+          .number()
+          .positive()
+          .greater(0)
+          .required(),
+      }),
+      {},
+    ),
   }),
 );
 
@@ -66,8 +83,21 @@ export const MESSAGE_BROKER_URI =
   `${env.MESSAGE_BROKER_PROTOCOL}://${env.MESSAGE_BROKER_USER}:${env.MESSAGE_BROKER_PASSWORD}@${env.MESSAGE_BROKER_HOST}` ??
   '';
 
-export const BINANCE_MINIMUM_ORDER_SIZE = +(
-  env.BINANCE_MINIMUM_ORDER_SIZE ?? 0
+export const BINANCE_MINIMUM_ORDER_SIZE: Record<string, number> =
+  QUOTE_ASSETS.reduce(
+    (acc, quoteAsset) => ({
+      ...acc,
+      [quoteAsset]: +(env[`BINANCE_${quoteAsset}_MINIMUM_ORDER_SIZE`] ?? 0),
+    }),
+    {} as Record<string, number>,
+  );
+
+export const DEFAULT_BUY_AMOUNT: Record<string, number> = QUOTE_ASSETS.reduce(
+  (acc, quoteAsset) => ({
+    ...acc,
+    [quoteAsset]: +(env[`DEFAULT_${quoteAsset}_BUY_AMOUNT`] ?? 0),
+  }),
+  {} as Record<string, number>,
 );
 export const BUY_ORDER_TTL = +(env.BUY_ORDER_TTL ?? 0) * MILLISECONDS.SECOND;
 export const SELL_ORDER_TTL = +(env.SELL_ORDER_TTL ?? 0) * MILLISECONDS.SECOND;
@@ -80,4 +110,3 @@ export const BINANCE_API_SECRET = env.BINANCE_API_SECRET ?? '';
 
 export const BUY_ORDER_TYPE = env.BUY_ORDER_TYPE ?? '';
 export const SELL_ORDER_TYPE = env.SELL_ORDER_TYPE ?? '';
-export const DEFAULT_BUY_AMOUNT = +(env.DEFAULT_BUY_AMOUNT ?? 0);

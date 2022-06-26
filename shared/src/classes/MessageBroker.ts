@@ -37,6 +37,10 @@ export class MessageBroker<T = any> {
       options.exchangeType ?? MESSAGE_BROKER_EXCHANGE_TYPES.TOPIC;
   }
 
+  getChannel() {
+    return this.channel;
+  }
+
   async initializeConnection() {
     if (!this.uri) {
       throw new Error('Message Broker URI is not defined');
