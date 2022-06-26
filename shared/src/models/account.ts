@@ -1,6 +1,14 @@
 import mongoose, { SchemaOptions } from 'mongoose';
 import { AccountAttributes } from '../interfaces/account';
 
+const assetSubsSchema = new mongoose.Schema(
+  {
+    asset: { type: String },
+    free: { type: Number },
+  },
+  { _id: false },
+);
+
 export const createAccountSchema = function createAccountSchema(
   options: SchemaOptions = {},
 ) {
@@ -8,13 +16,7 @@ export const createAccountSchema = function createAccountSchema(
     {
       id: { type: String },
       balances: {
-        type: [
-          {
-            asset: { type: String },
-            free: { type: Number },
-            locked: { type: Number },
-          },
-        ],
+        type: [assetSubsSchema],
       },
       type: { type: String },
       last_order_error: { type: Number },

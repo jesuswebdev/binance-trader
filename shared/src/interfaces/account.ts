@@ -3,7 +3,6 @@ import { LeanDocument, Model, Types } from 'mongoose';
 type AssetBalance = {
   asset: string;
   free: number;
-  locked: number;
 };
 
 export interface AccountAttributes {
