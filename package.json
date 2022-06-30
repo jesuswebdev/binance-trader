@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "docker:build:markets-observer": "docker build -t jesuswebdev/binance-trader-markets-observer -f ./markets-observer/Dockerfile .",
+    "docker:push:markets-observer": "docker push jesuswebdev/binance-trader-markets-observer"
   },
   "keywords": [],
   "author": "",
