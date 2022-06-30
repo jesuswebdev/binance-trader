@@ -1,10 +1,4 @@
-export type Pair = {
-  symbol: string;
-  priceTickSize: number;
-  stepSize: number;
-  quoteAsset: string;
-  baseAsset: string;
-};
+import { Pair } from './interfaces';
 
 export const PAIRS: Pair[] = [
   {

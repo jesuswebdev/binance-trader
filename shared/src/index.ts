@@ -1,7 +1,8 @@
 import { ObjectSchema } from 'joi';
-import { PAIRS } from './busd_pairs';
+import { ALL_PAIRS as PAIRS } from './all_pairs';
 import { MILLISECONDS } from './constants/index';
-export * from './busd_pairs';
+// export * from './busd_pairs';
+export { ALL_PAIRS as PAIRS } from './all_pairs';
 
 export * from './classes/index';
 export * from './constants/index';

@@ -45,3 +45,11 @@ export interface MessageBrokerAssertQueueOptions {
 export interface MongoError {
   code: number;
 }
+
+export type Pair = {
+  symbol: string;
+  priceTickSize: number;
+  stepSize: number;
+  quoteAsset: string;
+  baseAsset: string;
+};
