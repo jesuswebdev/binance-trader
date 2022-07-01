@@ -7,7 +7,9 @@
     "docker:build:markets-observer": "docker build -t jesuswebdev/binance-trader-markets-observer -f ./markets-observer/Dockerfile .",
     "docker:push:markets-observer": "docker push jesuswebdev/binance-trader-markets-observer",
     "docker:build:candles-processor": "docker build -t jesuswebdev/binance-trader-candles-processor -f ./candles-processor/Dockerfile .",
-    "docker:push:candles-processor": "docker push jesuswebdev/binance-trader-candles-processor"
+    "docker:push:candles-processor": "docker push jesuswebdev/binance-trader-candles-processor",
+    "docker:build:positions-processor": "docker build -t jesuswebdev/binance-trader-positions-processor -f ./positions-processor/Dockerfile .",
+    "docker:push:positions-processor": "docker push jesuswebdev/binance-trader-positions-processor"
   },
   "keywords": [],
   "author": "",
