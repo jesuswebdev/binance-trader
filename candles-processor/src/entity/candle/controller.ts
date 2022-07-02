@@ -8,9 +8,14 @@ import {
   getTimeDiff,
   LeanCandleDocument,
   MarketModel,
+  MILLISECONDS,
   PAIRS,
 } from '@binance-trader/shared';
-import { CANDLE_INTERVAL, PROCESS_CANDLES_INTERVAL } from '../../config';
+import {
+  CANDLE_INTERVAL,
+  ENVIRONMENT,
+  PROCESS_CANDLES_INTERVAL,
+} from '../../config';
 import {
   buildCandles,
   getIndicatorsValues,
@@ -270,6 +275,21 @@ export const fillCandlesData = async function fillCandlesData({
 
   console.log('Attempting to fill candles data...');
 
+  const lockKey = `${ENVIRONMENT}_candles_update_lock`;
+
+  // get lock
+  const candlesUpdateLock = getBooleanValue(await redis.get(lockKey));
+
+  // if lock is set return
+  if (candlesUpdateLock) {
+    console.log('Unable to continue. Update Candles Lock is set.');
+
+    return;
+  }
+
+  // else set lock
+  await redis.set(lockKey, 1, { PXAT: MILLISECONDS.MINUTE * 15 });
+
   for (const pair of PAIRS) {
     const symbol = pair.symbol;
     const interval = CANDLE_INTERVAL;
@@ -327,6 +347,9 @@ export const fillCandlesData = async function fillCandlesData({
       }
     }
   }
+
+  //remove lock
+  await redis.del(lockKey);
 
   console.log('Finished filling candles data');
 };
