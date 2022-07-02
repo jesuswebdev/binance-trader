@@ -4,8 +4,13 @@ COPY ./shared ./shared/
 ENV NODE_ENV production
 RUN npm install --include=dev --prefix ./shared \
     && npm run build --prefix ./shared \
-    && npm cache clean --force 
-    
+    && npm cache clean --force
+
+FROM node:16.15.1-alpine as shared-deps
+WORKDIR /usr/app
+COPY --from=shared ./usr/app/shared/package*.json ./shared/
+RUN npm ci --only=production --prefix ./shared \
+    && npm cache clean --force
 
 FROM node:16.15.1-alpine as deps
 WORKDIR /usr/app
@@ -33,8 +38,8 @@ RUN mkdir /usr/app && chown -R node:node /usr/app
 USER node
 WORKDIR /usr/app
 
-COPY --chown=node:node --from=shared ./usr/app/shared/package.json ./shared/
-COPY --chown=node:node --from=shared ./usr/app/shared/build/ ./shared/build/
+COPY --chown=node:node --from=deps ./usr/app/shared/ ./shared/
+COPY --chown=node:node --from=shared-deps ./usr/app/shared/node_modules ./shared/node_modules
 COPY --chown=node:node --from=deps ./usr/app/trader ./trader/
 COPY --chown=node:node --from=build ./usr/app/trader/build/ ./trader/build/
 
