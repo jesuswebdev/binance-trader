@@ -11,7 +11,9 @@
     "docker:build:positions-processor": "docker build -t jesuswebdev/binance-trader-positions-processor -f ./positions-processor/Dockerfile .",
     "docker:push:positions-processor": "docker push jesuswebdev/binance-trader-positions-processor",
     "docker:build:signals-processor": "docker build -t jesuswebdev/binance-trader-signals-processor -f ./signals-processor/Dockerfile .",
-    "docker:push:signals-processor": "docker push jesuswebdev/binance-trader-signals-processor"
+    "docker:push:signals-processor": "docker push jesuswebdev/binance-trader-signals-processor",
+    "docker:build:account-observer": "docker build -t jesuswebdev/binance-trader-account-observer -f ./account-observer/Dockerfile .",
+    "docker:push:account-observer": "docker push jesuswebdev/binance-trader-account-observer"
   },
   "keywords": [],
   "author": "",
