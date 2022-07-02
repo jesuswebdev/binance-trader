@@ -9,7 +9,9 @@
     "docker:build:candles-processor": "docker build -t jesuswebdev/binance-trader-candles-processor -f ./candles-processor/Dockerfile .",
     "docker:push:candles-processor": "docker push jesuswebdev/binance-trader-candles-processor",
     "docker:build:positions-processor": "docker build -t jesuswebdev/binance-trader-positions-processor -f ./positions-processor/Dockerfile .",
-    "docker:push:positions-processor": "docker push jesuswebdev/binance-trader-positions-processor"
+    "docker:push:positions-processor": "docker push jesuswebdev/binance-trader-positions-processor",
+    "docker:build:signals-processor": "docker build -t jesuswebdev/binance-trader-signals-processor -f ./signals-processor/Dockerfile .",
+    "docker:push:signals-processor": "docker push jesuswebdev/binance-trader-signals-processor"
   },
   "keywords": [],
   "author": "",
