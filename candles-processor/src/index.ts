@@ -19,7 +19,13 @@ import {
   processCandleTick,
 } from './entity/candle/controller';
 
+function logMessage(msg: string) {
+  console.log(`[${new Date().toISOString()}] PID (${process.pid}) - ${msg}`);
+}
+
 const start = async () => {
+  logMessage('Starting Candles Processor');
+
   const binance = getBinanceInstance({
     apiUrl: BINANCE_API_URL,
     apiKey: BINANCE_API_KEY,
@@ -37,6 +43,26 @@ const start = async () => {
     initRedis(),
     broker.initializeConnection(),
   ]);
+
+  const terminate = () => {
+    console.log(
+      `[${new Date().toISOString()}] PID (${
+        process.pid
+      }) - Exiting Candles Processor`,
+    );
+
+    Promise.all([db.destroy(), redis.disconnect(), broker.close]).then(() => {
+      console.log(
+        `[${new Date().toISOString()}] PID (${
+          process.pid
+        }) - Candles Processor terminated`,
+      );
+      process.exit();
+    });
+  };
+
+  process.on('SIGINT', terminate);
+  process.on('SIGTERM', terminate);
 
   const msgHandler = async (data: CandleTickData) => {
     const candles = await processCandleTick({
@@ -61,6 +87,12 @@ const start = async () => {
     });
 
   await fillCandlesData({ database: db, redis, binance });
+
+  console.log(
+    `[${new Date().toISOString()}] PID (${
+      process.pid
+    }) - Candles Processor started`,
+  );
 };
 
 start();
