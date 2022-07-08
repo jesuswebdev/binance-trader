@@ -20,7 +20,13 @@ import {
   createSellOrderForCanceledOrder,
 } from './entity/order/controller';
 
+function logMessage(msg: string) {
+  console.log(`[${new Date().toISOString()}] PID (${process.pid}) - ${msg}`);
+}
+
 const start = async () => {
+  logMessage('Starting Trader');
+
   const binance = getBinanceInstance({
     apiUrl: BINANCE_API_URL,
     apiKey: BINANCE_API_KEY,
@@ -34,6 +40,18 @@ const start = async () => {
   });
 
   const [db] = await Promise.all([initDb(), broker.initializeConnection()]);
+
+  const terminate = () => {
+    logMessage('Exiting Trader');
+
+    Promise.all([db.destroy(), broker.close]).then(() => {
+      logMessage('Trader terminated');
+      process.exit();
+    });
+  };
+
+  process.on('SIGINT', terminate);
+  process.on('SIGTERM', terminate);
 
   // =========== DEAD LETTER EXCHANGE ===============
 
@@ -113,6 +131,8 @@ const start = async () => {
       { deadLetterExchange: EXCHANGE_TYPES.DEAD_LETTER },
     )
     .catch(errorHandler);
+
+  logMessage('Trader started');
 };
 
 start();
