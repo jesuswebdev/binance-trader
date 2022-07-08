@@ -14,7 +14,13 @@ import {
   processOpenPositions,
 } from './entity/position/controller';
 
+function logMessage(msg: string) {
+  console.log(`[${new Date().toISOString()}] PID (${process.pid}) - ${msg}`);
+}
+
 const start = async () => {
+  logMessage('Starting Positions Processor');
+
   const broker = new MessageBroker({
     exchange: EXCHANGE_TYPES.MAIN,
     uri: MESSAGE_BROKER_URI,
@@ -22,6 +28,18 @@ const start = async () => {
   });
 
   const [db] = await Promise.all([initDb(), broker.initializeConnection()]);
+
+  const terminate = () => {
+    logMessage('Exiting Candles Processor');
+
+    Promise.all([db.destroy(), broker.close]).then(() => {
+      logMessage('Candles Processor terminated');
+      process.exit();
+    });
+  };
+
+  process.on('SIGINT', terminate);
+  process.on('SIGTERM', terminate);
 
   const candleProcessedHandler = async (data: CandleTickData) => {
     await processOpenPositions({ database: db, candle: data, broker });
@@ -39,6 +57,8 @@ const start = async () => {
   broker
     .listen(SIGNAL_EVENTS.SIGNAL_CLOSED, signalClosedHandler)
     .catch((error: unknown) => console.error(error));
+
+  logMessage('Positions Processor started');
 };
 
 start();
