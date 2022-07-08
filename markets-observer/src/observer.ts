@@ -85,7 +85,7 @@ class Observer {
   }
 
   private onConnectionClose() {
-    console.log(`${new Date().toISOString()} | Stream closed.`);
+    console.log(`[${new Date().toISOString()}] | Stream closed.`);
     this.broker?.close().then(() => {
       if (this.client) {
         this.client.removeAllListeners();
@@ -98,6 +98,8 @@ class Observer {
   }
 
   private terminate() {
+    console.log(`[${new Date().toUTCString()}] Terminating Markets Observer`);
+
     const client = this.client;
 
     if (client && client.readyState === ws.OPEN) {
@@ -113,6 +115,11 @@ class Observer {
             throw error;
           }
           client.terminate();
+
+          console.log(
+            `[${new Date().toUTCString()}] Markets Observer terminated`,
+          );
+
           process.exit();
         },
       );
@@ -120,7 +127,7 @@ class Observer {
   }
 
   async init() {
-    console.log(`Markets Observer started at ${new Date().toUTCString()}`);
+    console.log(`[${new Date().toUTCString()}] Starting Markets Observer`);
 
     this.broker = new MessageBroker<CandleTickData>({
       exchange: EXCHANGE_TYPES.MAIN,
@@ -143,6 +150,8 @@ class Observer {
 
     process.on('SIGINT', this.terminate.bind(this));
     process.on('SIGTERM', this.terminate.bind(this));
+
+    console.log(`[${new Date().toUTCString()}] Markets Observer started`);
   }
 }
 
