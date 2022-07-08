@@ -7,6 +7,7 @@ import {
   getBooleanValue,
   getTimeDiff,
   LeanCandleDocument,
+  LeanMarketDocument,
   MarketModel,
   MILLISECONDS,
   PAIRS,
@@ -87,6 +88,17 @@ export const processCandleTick = async function processCandleTick({
   ) {
     await redis.set(redisKeys.candlesPersistLock, 1);
     await redis.set(redisKeys.lastProcessDate, Date.now());
+
+    const market: LeanMarketDocument = await marketModel
+      .findOne({ symbol: candle.symbol })
+      .hint('symbol_1')
+      .lean();
+
+    if (!market.enabled) {
+      await redis.del(redisKeys.candlesPersistLock);
+
+      return;
+    }
 
     const length = await redis.lLen(redisKeys.candles);
 
