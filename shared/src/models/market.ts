@@ -18,7 +18,7 @@ export const createMarketSchema = function createMarketSchema(
       price_tick_size: { type: Number, validate: numberSchemaValidation },
       step_size: { type: Number, validate: numberSchemaValidation },
       enabled: { type: Boolean, default: false },
-      use_test_account: { type: Boolean, default: true },
+      trading_enabled: { type: Boolean, default: false },
       last_price: {
         type: Number,
         validate: numberSchemaValidation,

@@ -9,9 +9,10 @@ export interface MarketAttributes {
   last_price: number;
   trader_lock: boolean;
   last_trader_lock_update: number;
-  /** Enabled for trading */
+  /** Enabled for: candles processing, creating signals, creating positions */
   enabled: boolean;
-  use_test_account: boolean;
+  /** Enabled for trading with real account */
+  trading_enabled: boolean;
 }
 
 export interface MarketDocument extends Document, MarketAttributes {
