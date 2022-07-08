@@ -178,11 +178,15 @@ export const createBuyOrder = async function createBuyOrder({
 
   const market: LeanMarketDocument = await marketModel
     .findOne({ symbol: position.symbol })
-    .select({ enabled: true, trader_lock: true, quote_asset: true })
+    .select({
+      trader_lock: true,
+      quote_asset: true,
+      trading_enabled: true,
+    })
     .hint('symbol_1')
     .lean();
 
-  if (!market.enabled) {
+  if (!market.trading_enabled) {
     console.log(
       `${position.symbol} | ${position._id} | Market disabled for trading.`,
     );
