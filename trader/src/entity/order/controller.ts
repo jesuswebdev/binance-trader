@@ -14,8 +14,10 @@ import {
   nz,
   OrderAttributes,
   OrderModel,
+  PAIRS,
   PositionModel,
   POSITION_EVENTS,
+  POSITION_STATUS,
   SIGNAL_TYPES,
   toSymbolPrecision,
   toSymbolStepPrecision,
@@ -192,9 +194,50 @@ export const createBuyOrder = async function createBuyOrder({
     (balance) => balance.asset === market.quote_asset,
   );
 
+  // find all positions where base asset = quote asset
+  // sum all quantity and substract that from the balance
+  // that would be the free amount
+
+  const symbolsWithSameBaseAssetAsTheQuoteAsset = PAIRS.filter(
+    (pair) => pair.baseAsset === market.quote_asset,
+  ).map((pair) => pair.symbol);
+
+  const openPositions = await positionModel
+    .find({
+      $and: [
+        { status: POSITION_STATUS.OPEN },
+        { symbol: { $in: symbolsWithSameBaseAssetAsTheQuoteAsset } },
+        { 'buy_order.orderId': { $exists: true } },
+      ],
+    })
+    .select({ buy_order: true })
+    .lean();
+
+  let reservedAmount = 0;
+
+  if (openPositions.length > 0) {
+    const existingOrders = await Promise.all(
+      openPositions.map((pos) =>
+        getOrderFromDbOrBinance({
+          database,
+          binance,
+          order: pos.buy_order as OrderAttributes,
+        }),
+      ),
+    );
+
+    for (const existingOrder of existingOrders) {
+      if (!existingOrder) {
+        continue;
+      }
+
+      reservedAmount += +existingOrder.cummulativeQuoteQty;
+    }
+  }
+
   const defaultBuyAmount = DEFAULT_BUY_AMOUNT[market.quote_asset];
 
-  const enoughBalance = assetBalance.free > defaultBuyAmount;
+  const enoughBalance = assetBalance.free - reservedAmount > defaultBuyAmount;
   const positionHasBuyOrder = await positionModel.exists({
     $and: [{ id: position.id }, { 'buy_order.orderId': { $exists: true } }],
   });
