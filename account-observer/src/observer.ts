@@ -13,10 +13,14 @@ import { AxiosInstance } from 'axios';
 import { parseAccountUpdate, parseOrder } from './utils';
 import { BINANCE_STREAM_URI, ENVIRONMENT } from './config';
 
+function logMessage(msg: string) {
+  console.log(`[${new Date().toISOString()}] PID (${process.pid}) - ${msg}`);
+}
 export default class AccountObserver {
   private readonly allowed_pairs: Map<string, boolean>;
   private listenKeyKeepAliveInterval: NodeJS.Timer | null;
   private client: ws.WebSocket | undefined;
+  private terminating: boolean;
   constructor(
     private readonly database: Connection,
     private readonly binance: AxiosInstance,
@@ -28,6 +32,7 @@ export default class AccountObserver {
     }
 
     this.listenKeyKeepAliveInterval = null;
+    this.terminating = false;
   }
 
   startListenKeyKeepAliveInterval() {
@@ -124,6 +129,8 @@ export default class AccountObserver {
   }
 
   async init() {
+    logMessage('Starting Account Observer');
+
     await this.updateBalance();
     const spot_account_listen_key = await this.getListenKey();
 
@@ -132,9 +139,7 @@ export default class AccountObserver {
     );
 
     this.client.on('open', () => {
-      console.log(
-        `${new Date().toISOString()} | Spot Account Observer | Connection open.`,
-      );
+      logMessage('Spot Account Observer | Connection open');
     });
 
     this.client.on('ping', () => {
@@ -203,16 +208,36 @@ export default class AccountObserver {
     });
 
     this.client.on('error', () => {
-      console.log(`${new Date().toISOString()} | Spot Orders Observer | ERROR`);
+      logMessage('Spot Orders Observer | ERROR');
       process.exit();
     });
 
-    this.client.on('close', async (...args) => {
-      console.log(
-        `${new Date().toISOString()} | Spot Orders Observer Stream closed.`,
-      );
-      console.log(args);
-      await this.init();
+    this.client.on('close', (code, reason) => {
+      logMessage('Spot Orders Observer Stream closed');
+      logMessage(`Code: ${code}, Reason: ${reason.toString()}`);
+
+      if (!this.terminating) {
+        this.init();
+      }
     });
+
+    process.on('SIGINT', this.terminate.bind(this));
+    process.on('SIGTERM', this.terminate.bind(this));
+  }
+
+  private terminate() {
+    logMessage('Terminating Account Observer');
+
+    const client = this.client;
+
+    if (client && client.readyState === ws.OPEN) {
+      this.terminating = true;
+
+      client.terminate();
+
+      logMessage('Account Observer terminated');
+
+      process.exit();
+    }
   }
 }
