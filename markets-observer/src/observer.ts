@@ -97,6 +97,28 @@ class Observer {
     });
   }
 
+  private terminate() {
+    const client = this.client;
+
+    if (client && client.readyState === ws.OPEN) {
+      this.terminating = true;
+      client.send(
+        JSON.stringify({
+          method: 'UNSUBSCRIBE',
+          params: this.subscriptionParams,
+          id: this.websocketId,
+        }),
+        (error) => {
+          if (error) {
+            throw error;
+          }
+          client.terminate();
+          process.exit();
+        },
+      );
+    }
+  }
+
   async init() {
     console.log(`Markets Observer started at ${new Date().toUTCString()}`);
 
@@ -119,27 +141,8 @@ class Observer {
     this.client.on('close', this.onConnectionClose.bind(this));
     this.client.on('ping', this.onPing.bind(this));
 
-    process.on('SIGINT', () => {
-      const client = this.client;
-
-      if (client && client.readyState === ws.OPEN) {
-        this.terminating = true;
-        client.send(
-          JSON.stringify({
-            method: 'UNSUBSCRIBE',
-            params: this.subscriptionParams,
-            id: this.websocketId,
-          }),
-          (error) => {
-            if (error) {
-              throw error;
-            }
-            client.terminate();
-            process.exit(1);
-          },
-        );
-      }
-    });
+    process.on('SIGINT', this.terminate.bind(this));
+    process.on('SIGTERM', this.terminate.bind(this));
   }
 }
 
