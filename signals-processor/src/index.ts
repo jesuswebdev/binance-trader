@@ -9,7 +9,13 @@ import { initDb } from './config/database';
 import { initRedis } from './config/redis';
 import { processSignals } from './entity/signal/controller';
 
+function logMessage(msg: string) {
+  console.log(`[${new Date().toISOString()}] PID (${process.pid}) - ${msg}`);
+}
+
 const start = async () => {
+  logMessage('Starting Signals Processor');
+
   const broker = new MessageBroker({
     exchange: EXCHANGE_TYPES.MAIN,
     uri: MESSAGE_BROKER_URI,
@@ -22,6 +28,18 @@ const start = async () => {
     broker.initializeConnection(),
   ]);
 
+  const terminate = () => {
+    logMessage('Exiting Signals Processor');
+
+    Promise.all([db.destroy(), redis.disconnect(), broker.close]).then(() => {
+      logMessage('Signals Processor terminated');
+      process.exit();
+    });
+  };
+
+  process.on('SIGINT', terminate);
+  process.on('SIGTERM', terminate);
+
   const msgHandler = async (msg: CandleTickData) => {
     await processSignals({ broker, redis, database: db, candle: msg });
   };
@@ -32,6 +50,8 @@ const start = async () => {
       console.error(error);
       throw error;
     });
+
+  logMessage('Signals Processor started');
 };
 
 start();
