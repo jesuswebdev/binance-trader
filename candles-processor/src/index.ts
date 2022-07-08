@@ -45,18 +45,10 @@ const start = async () => {
   ]);
 
   const terminate = () => {
-    console.log(
-      `[${new Date().toISOString()}] PID (${
-        process.pid
-      }) - Exiting Candles Processor`,
-    );
+    logMessage('Exiting Candles Processor');
 
     Promise.all([db.destroy(), redis.disconnect(), broker.close]).then(() => {
-      console.log(
-        `[${new Date().toISOString()}] PID (${
-          process.pid
-        }) - Candles Processor terminated`,
-      );
+      logMessage('Candles Processor terminated');
       process.exit();
     });
   };
@@ -88,11 +80,7 @@ const start = async () => {
 
   await fillCandlesData({ database: db, redis, binance });
 
-  console.log(
-    `[${new Date().toISOString()}] PID (${
-      process.pid
-    }) - Candles Processor started`,
-  );
+  logMessage('Candles Processor started');
 };
 
 start();
