@@ -81,7 +81,9 @@ class Observer {
 
   private onError() {
     console.log(`${new Date().toISOString()} | ERROR`);
-    process.exit(1);
+    this.broker?.close().then(() => {
+      process.exit(1);
+    });
   }
 
   private onConnectionClose() {
@@ -124,6 +126,11 @@ class Observer {
             process.exit();
           },
         );
+      } else {
+        console.log(
+          `[${new Date().toUTCString()}] Markets Observer terminated`,
+        );
+        process.exit();
       }
     });
   }
