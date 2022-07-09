@@ -100,30 +100,32 @@ class Observer {
   private terminate() {
     console.log(`[${new Date().toUTCString()}] Terminating Markets Observer`);
 
-    const client = this.client;
+    this.broker?.close().then(() => {
+      const client = this.client;
 
-    if (client && client.readyState === ws.OPEN) {
-      this.terminating = true;
-      client.send(
-        JSON.stringify({
-          method: 'UNSUBSCRIBE',
-          params: this.subscriptionParams,
-          id: this.websocketId,
-        }),
-        (error) => {
-          if (error) {
-            throw error;
-          }
-          client.terminate();
+      if (client && client.readyState === ws.OPEN) {
+        this.terminating = true;
+        client.send(
+          JSON.stringify({
+            method: 'UNSUBSCRIBE',
+            params: this.subscriptionParams,
+            id: this.websocketId,
+          }),
+          (error) => {
+            if (error) {
+              throw error;
+            }
+            client.terminate();
 
-          console.log(
-            `[${new Date().toUTCString()}] Markets Observer terminated`,
-          );
+            console.log(
+              `[${new Date().toUTCString()}] Markets Observer terminated`,
+            );
 
-          process.exit();
-        },
-      );
-    }
+            process.exit();
+          },
+        );
+      }
+    });
   }
 
   async init() {
