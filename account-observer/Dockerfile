@@ -1,4 +1,4 @@
-FROM node:16.15.1-alpine as shared
+FROM node:16.15.1 as shared
 WORKDIR /usr/app
 COPY ./shared ./shared/
 ENV NODE_ENV production
@@ -6,13 +6,13 @@ RUN npm install --include=dev --prefix ./shared \
     && npm run build --prefix ./shared \
     && npm cache clean --force
 
-FROM node:16.15.1-alpine as shared-deps
+FROM node:16.15.1 as shared-deps
 WORKDIR /usr/app
 COPY --from=shared ./usr/app/shared/package*.json ./shared/
 RUN npm ci --only=production --prefix ./shared \
     && npm cache clean --force
 
-FROM node:16.15.1-alpine as deps
+FROM node:16.15.1 as deps
 WORKDIR /usr/app
 COPY ./account-observer/package*.json ./account-observer/
 COPY --from=shared ./usr/app/shared/package.json ./shared/
@@ -20,7 +20,7 @@ COPY --from=shared ./usr/app/shared/build/ ./shared/build/
 RUN npm ci --only=production --prefix ./account-observer \
     && npm cache clean --force
 
-FROM node:16.15.1-alpine as build
+FROM node:16.15.1 as build
 WORKDIR /usr/app
 COPY --from=deps ./usr/app/ .
 COPY ./account-observer/ ./account-observer/
@@ -29,7 +29,7 @@ RUN npm install --include=dev --omit=peer --omit=optional --prefix ./account-obs
     && npm cache clean --force \
     && npm run build --prefix ./account-observer
 
-FROM node:16.15.1-alpine
+FROM node:16.15.1
 
 ENV NODE_ENV production
 
