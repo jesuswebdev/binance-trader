@@ -209,7 +209,9 @@ export default class AccountObserver {
 
     this.client.on('error', () => {
       logMessage('Spot Orders Observer | ERROR');
-      process.exit();
+      this.database.destroy().then(() => {
+        process.exit();
+      });
     });
 
     this.client.on('close', (code, reason) => {
@@ -228,16 +230,18 @@ export default class AccountObserver {
   private terminate() {
     logMessage('Terminating Account Observer');
 
-    const client = this.client;
+    this.database.destroy().then(() => {
+      const client = this.client;
 
-    if (client && client.readyState === ws.OPEN) {
-      this.terminating = true;
+      if (client && client.readyState === ws.OPEN) {
+        this.terminating = true;
 
-      client.terminate();
+        client.terminate();
 
-      logMessage('Account Observer terminated');
+        logMessage('Account Observer terminated');
 
-      process.exit();
-    }
+        process.exit();
+      }
+    });
   }
 }
