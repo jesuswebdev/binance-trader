@@ -55,6 +55,10 @@ const start = async () => {
 
   process.on('SIGINT', terminate);
   process.on('SIGTERM', terminate);
+  process.on('unhandledRejection', (reason) => {
+    console.error(reason);
+    terminate();
+  });
 
   const msgHandler = async (data: CandleTickData) => {
     const candles = await processCandleTick({

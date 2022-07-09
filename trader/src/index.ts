@@ -52,6 +52,10 @@ const start = async () => {
 
   process.on('SIGINT', terminate);
   process.on('SIGTERM', terminate);
+  process.on('unhandledRejection', (reason) => {
+    console.error(reason);
+    terminate();
+  });
 
   // =========== DEAD LETTER EXCHANGE ===============
 

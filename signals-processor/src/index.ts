@@ -39,6 +39,10 @@ const start = async () => {
 
   process.on('SIGINT', terminate);
   process.on('SIGTERM', terminate);
+  process.on('unhandledRejection', (reason) => {
+    console.error(reason);
+    terminate();
+  });
 
   const msgHandler = async (msg: CandleTickData) => {
     await processSignals({ broker, redis, database: db, candle: msg });
