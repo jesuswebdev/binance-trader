@@ -47,7 +47,7 @@ const start = async () => {
   const terminate = () => {
     logMessage('Exiting Candles Processor');
 
-    Promise.all([db.destroy(), redis.disconnect(), broker.close]).then(() => {
+    Promise.all([db.destroy(), redis.disconnect(), broker.close()]).then(() => {
       logMessage('Candles Processor terminated');
       process.exit();
     });

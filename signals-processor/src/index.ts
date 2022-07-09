@@ -31,7 +31,7 @@ const start = async () => {
   const terminate = () => {
     logMessage('Exiting Signals Processor');
 
-    Promise.all([db.destroy(), redis.disconnect(), broker.close]).then(() => {
+    Promise.all([db.destroy(), redis.disconnect(), broker.close()]).then(() => {
       logMessage('Signals Processor terminated');
       process.exit();
     });

@@ -32,7 +32,7 @@ const start = async () => {
   const terminate = () => {
     logMessage('Exiting Candles Processor');
 
-    Promise.all([db.destroy(), broker.close]).then(() => {
+    Promise.all([db.destroy(), broker.close()]).then(() => {
       logMessage('Candles Processor terminated');
       process.exit();
     });

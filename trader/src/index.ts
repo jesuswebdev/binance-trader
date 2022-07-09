@@ -44,7 +44,7 @@ const start = async () => {
   const terminate = () => {
     logMessage('Exiting Trader');
 
-    Promise.all([db.destroy(), broker.close]).then(() => {
+    Promise.all([db.destroy(), broker.close()]).then(() => {
       logMessage('Trader terminated');
       process.exit();
     });
