@@ -2,8 +2,17 @@ import getBinanceInstance from '@binance-trader/shared/build/binance-instance-cr
 import { BINANCE_API_KEY, BINANCE_API_SECRET, BINANCE_API_URL } from './config';
 import { initDb } from './config/database';
 import Observer from './observer';
+import http from 'http';
 
 const start = async () => {
+  http
+    .createServer(function (_, res) {
+      res.statusCode = 200;
+      res.write('OK');
+      res.end();
+    })
+    .listen(8080);
+
   const db = await initDb();
 
   const binance = getBinanceInstance({
