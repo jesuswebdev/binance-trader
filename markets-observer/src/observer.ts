@@ -58,21 +58,21 @@ class Observer {
     const message: KlineUpdateEvent = (JSON.parse(data.toString()) || {}).data;
 
     if (message?.e === 'kline') {
-      const k = message.k;
+      const kline = message.k;
       const candle: CandleTickData = {
-        id: `${message.s}_${k.i}_${k.t}`,
+        id: `${message.s}_${kline.i}_${kline.t}`,
         symbol: message.s,
         event_time: message.E || Date.now(),
-        open_time: k.t,
-        close_time: k.T,
-        interval: k.i,
-        open_price: +k.o,
-        close_price: +k.c,
-        high_price: +k.h,
-        low_price: +k.l,
-        base_asset_volume: +k.v,
-        quote_asset_volume: +k.q,
-        date: new Date(k.t).toISOString(),
+        open_time: kline.t,
+        close_time: kline.T,
+        interval: kline.i,
+        open_price: +kline.o,
+        close_price: +kline.c,
+        high_price: +kline.h,
+        low_price: +kline.l,
+        base_asset_volume: +kline.v,
+        quote_asset_volume: +kline.q,
+        date: new Date(kline.t).toISOString(),
       };
 
       this.broker?.publish(CANDLE_EVENTS.CANDLE_TICK, candle);

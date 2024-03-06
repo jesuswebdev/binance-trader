@@ -54,7 +54,12 @@
     "no-return-await": "error",
     "no-unneeded-ternary": "error",
     "block-spacing": ["error", "always"],
-    "no-multiple-empty-lines": ["error", { "max": 1 }]
+    "no-multiple-empty-lines": ["error", { "max": 1 }],
+    "id-length": [
+      2,
+      { "exceptions": ["h", "i", "j", "_"], "properties": "never" }
+    ],
+    "max-statements-per-line": ["error", { "max": 1 }]
   },
   "ignorePatterns": ["build"]
 }
