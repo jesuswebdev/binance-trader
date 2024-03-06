@@ -43,10 +43,12 @@ export const applyStrategy = function applyStrategy(
     currentCandle.plus_di > currentCandle.minus_di;
 
   const above_ema = currentCandle.close_price > currentCandle.ema_50;
-  const upward_slope = candles.slice(-3).every((c) => c.ema_50_slope === 1);
+  const upward_slope = candles
+    .slice(-3)
+    .every((candle) => candle.ema_50_slope === 1);
   const green_candles = candles
     .slice(-2)
-    .every((c) => c.close_price > c.open_price);
+    .every((candle) => candle.close_price > candle.open_price);
 
   const trending =
     previousCandle.trend === 1 &&
