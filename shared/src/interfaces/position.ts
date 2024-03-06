@@ -34,6 +34,7 @@ export interface PositionAttributes {
   configuration: Record<string, any>;
   trailing_stop_loss_trigger_time: number;
   stop_loss_trigger_time: number;
+  take_profit_trigger_time: number;
   last_tsl_update: number;
   trader_lock: boolean;
   filled_on_update: boolean;

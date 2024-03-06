@@ -57,6 +57,7 @@ export const createPositionSchema = function createPositionSchema(
       configuration: { type: Object },
       trailing_stop_loss_trigger_time: { type: Number },
       stop_loss_trigger_time: { type: Number },
+      take_profit_trigger_time: { type: Number },
       last_tsl_update: { type: Number, default: 0 },
       trader_lock: { type: Boolean, default: false },
       filled_on_update: { type: Boolean, default: false },
