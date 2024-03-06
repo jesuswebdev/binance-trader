@@ -12,7 +12,8 @@ export const createCandleSchema = function createCandleSchema(
       symbol: {
         type: String,
         required: true,
-        validate: (value: string) => PAIRS.map((p) => p.symbol).includes(value),
+        validate: (value: string) =>
+          PAIRS.map((pair) => pair.symbol).includes(value),
       },
       open_time: {
         type: Number,

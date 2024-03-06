@@ -101,7 +101,7 @@ export class MessageBroker<T = any> {
       throw new Error('onMessage handler is not defined');
     }
 
-    const q = await this.channel?.assertQueue(
+    const newQueue = await this.channel?.assertQueue(
       'q_' + this.queue + '_' + topic.replace('.', '_'),
       {
         durable: true,
@@ -109,13 +109,13 @@ export class MessageBroker<T = any> {
       },
     );
 
-    if (!q?.queue) {
+    if (!newQueue?.queue) {
       throw new Error('There was an error asserting the queue');
     }
 
-    await this.channel?.bindQueue(q?.queue, this.exchange, topic);
+    await this.channel?.bindQueue(newQueue?.queue, this.exchange, topic);
 
-    this.channel?.consume(q?.queue, async (msg) => {
+    this.channel?.consume(newQueue?.queue, async (msg) => {
       if (msg !== null) {
         const content = this.decodeMessage(msg);
 

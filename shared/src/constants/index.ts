@@ -3,7 +3,8 @@ export const EXCHANGE_TYPES = {
   DEAD_LETTER: 'BINANCE_TRADER_DEAD_LETTER_EXCHANGE',
 } as const;
 
-export type ExchangeTypes = typeof EXCHANGE_TYPES[keyof typeof EXCHANGE_TYPES];
+export type ExchangeTypes =
+  (typeof EXCHANGE_TYPES)[keyof typeof EXCHANGE_TYPES];
 
 export const MESSAGE_BROKER_EXCHANGE_TYPES = {
   FANOUT: 'fanout',
@@ -13,14 +14,14 @@ export const MESSAGE_BROKER_EXCHANGE_TYPES = {
 } as const;
 
 export type MessageBrokerExchangeTypes =
-  typeof MESSAGE_BROKER_EXCHANGE_TYPES[keyof typeof MESSAGE_BROKER_EXCHANGE_TYPES];
+  (typeof MESSAGE_BROKER_EXCHANGE_TYPES)[keyof typeof MESSAGE_BROKER_EXCHANGE_TYPES];
 
 export const CANDLE_EVENTS = {
   CANDLE_TICK: 'candle.tick',
   CANDLE_PROCESSED: 'candle.processed',
 } as const;
 
-export type CandleEvents = typeof CANDLE_EVENTS[keyof typeof CANDLE_EVENTS];
+export type CandleEvents = (typeof CANDLE_EVENTS)[keyof typeof CANDLE_EVENTS];
 
 export const POSITION_EVENTS = {
   POSITION_CREATED: 'position.created',
@@ -30,14 +31,14 @@ export const POSITION_EVENTS = {
 } as const;
 
 export type PositionEvents =
-  typeof POSITION_EVENTS[keyof typeof POSITION_EVENTS];
+  (typeof POSITION_EVENTS)[keyof typeof POSITION_EVENTS];
 
 export const SIGNAL_EVENTS = {
   SIGNAL_CREATED: 'signal.created',
   SIGNAL_CLOSED: 'signal.closed',
 } as const;
 
-export type SignalEvents = typeof SIGNAL_EVENTS[keyof typeof SIGNAL_EVENTS];
+export type SignalEvents = (typeof SIGNAL_EVENTS)[keyof typeof SIGNAL_EVENTS];
 
 export const MILLISECONDS = {
   SECOND: 1e3,
@@ -53,7 +54,7 @@ export const POSITION_STATUS = {
 } as const;
 
 export type PositionStatus =
-  typeof POSITION_STATUS[keyof typeof POSITION_STATUS];
+  (typeof POSITION_STATUS)[keyof typeof POSITION_STATUS];
 
 export const POSITION_SELL_TRIGGER = {
   STOP_LOSS: 'STOP_LOSS',
@@ -62,7 +63,7 @@ export const POSITION_SELL_TRIGGER = {
 } as const;
 
 export type PositionSellTrigger =
-  typeof POSITION_SELL_TRIGGER[keyof typeof POSITION_SELL_TRIGGER];
+  (typeof POSITION_SELL_TRIGGER)[keyof typeof POSITION_SELL_TRIGGER];
 
 export const BINANCE_ORDER_TYPES = {
   LIMIT: 'LIMIT',
@@ -75,7 +76,7 @@ export const BINANCE_ORDER_TYPES = {
 } as const;
 
 export type BinanceOrderTypes =
-  typeof BINANCE_ORDER_TYPES[keyof typeof BINANCE_ORDER_TYPES];
+  (typeof BINANCE_ORDER_TYPES)[keyof typeof BINANCE_ORDER_TYPES];
 
 export const BINANCE_ORDER_STATUS = {
   NEW: 'NEW',
@@ -87,7 +88,7 @@ export const BINANCE_ORDER_STATUS = {
 } as const;
 
 export type BinanceOrderStatus =
-  typeof BINANCE_ORDER_STATUS[keyof typeof BINANCE_ORDER_STATUS];
+  (typeof BINANCE_ORDER_STATUS)[keyof typeof BINANCE_ORDER_STATUS];
 
 export const QUOTE_ASSETS = {
   BTC: 'BTC',
@@ -95,14 +96,14 @@ export const QUOTE_ASSETS = {
   USDT: 'USDT',
 } as const;
 
-export type QuoteAssets = typeof QUOTE_ASSETS[keyof typeof QUOTE_ASSETS];
+export type QuoteAssets = (typeof QUOTE_ASSETS)[keyof typeof QUOTE_ASSETS];
 
 export const SIGNAL_TYPES = {
   BUY: 'BUY',
   SELL: 'SELL',
 } as const;
 
-export type SignalTypes = typeof SIGNAL_TYPES[keyof typeof SIGNAL_TYPES];
+export type SignalTypes = (typeof SIGNAL_TYPES)[keyof typeof SIGNAL_TYPES];
 
 export const ENVIRONMENT_TYPES = {
   DEVELOPMENT: 'development',
@@ -120,4 +121,4 @@ export const DATABASE_MODELS = {
 } as const;
 
 export type DatabaseModels =
-  typeof DATABASE_MODELS[keyof typeof DATABASE_MODELS];
+  (typeof DATABASE_MODELS)[keyof typeof DATABASE_MODELS];

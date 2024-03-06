@@ -11,7 +11,8 @@ export const createMarketSchema = function createMarketSchema(
       symbol: {
         type: String,
         required: true,
-        validate: (value: string) => PAIRS.map((p) => p.symbol).includes(value),
+        validate: (value: string) =>
+          PAIRS.map((pair) => pair.symbol).includes(value),
       },
       quote_asset: { type: String },
       base_asset: { type: String },
