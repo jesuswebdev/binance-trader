@@ -93,6 +93,10 @@ export const createCandleSchema = function createCandleSchema(
         enum: [1, -1],
         validate: numberSchemaValidation,
       },
+      ha_open: { type: Number, validate: numberSchemaValidation },
+      ha_close: { type: Number, validate: numberSchemaValidation },
+      ha_high: { type: Number, validate: numberSchemaValidation },
+      ha_low: { type: Number, validate: numberSchemaValidation },
     },
     { timestamps: true, ...options },
   );

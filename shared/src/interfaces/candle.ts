@@ -40,6 +40,10 @@ export interface CandleAttributes extends CandleTickData {
   is_dump: boolean;
   volume_trend: number;
   ema_50_slope: number;
+  ha_open: number;
+  ha_close: number;
+  ha_high: number;
+  ha_low: number;
 }
 
 export interface CandleDocument extends Document, CandleAttributes {
