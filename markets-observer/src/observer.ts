@@ -8,6 +8,7 @@ import {
 } from '@binance-trader/shared';
 import { KlineUpdateEvent } from './utils/interfaces';
 import { BINANCE_STREAM_URI, MESSAGE_BROKER_URI } from './config';
+import logger from './utils/logger';
 
 interface constructorOptions {
   markets: Pair[];
@@ -34,7 +35,7 @@ class Observer {
   }
 
   private onConnectionOpen() {
-    console.log(`${new Date().toISOString()} | Connection open.`);
+    logger.info('Connection open');
 
     this.client?.send(
       JSON.stringify({
@@ -79,15 +80,15 @@ class Observer {
     }
   }
 
-  private onError() {
-    console.log(`${new Date().toISOString()} | ERROR`);
+  private onError(error: Error) {
+    logger.error(error);
     this.broker?.close().then(() => {
       process.exit(1);
     });
   }
 
   private onConnectionClose() {
-    console.log(`[${new Date().toISOString()}] | Stream closed.`);
+    logger.info('Stream closed');
     this.broker?.close().then(() => {
       if (this.client) {
         this.client.removeAllListeners();
@@ -100,7 +101,7 @@ class Observer {
   }
 
   private terminate() {
-    console.log(`[${new Date().toUTCString()}] Terminating Markets Observer`);
+    logger.info('Terminating Markets Observer');
 
     this.broker?.close().then(() => {
       const client = this.client;
@@ -119,24 +120,20 @@ class Observer {
             }
             client.terminate();
 
-            console.log(
-              `[${new Date().toUTCString()}] Markets Observer terminated`,
-            );
+            logger.info('Markets Observer terminated');
 
             process.exit();
           },
         );
       } else {
-        console.log(
-          `[${new Date().toUTCString()}] Markets Observer terminated`,
-        );
+        logger.info('Markets Observer terminated');
         process.exit();
       }
     });
   }
 
   async init() {
-    console.log(`[${new Date().toUTCString()}] Starting Markets Observer`);
+    logger.info('Starting Markets Observer');
 
     this.broker = new MessageBroker<CandleTickData>({
       exchange: EXCHANGE_TYPES.MAIN,
@@ -160,7 +157,7 @@ class Observer {
     process.on('SIGINT', this.terminate.bind(this));
     process.on('SIGTERM', this.terminate.bind(this));
 
-    console.log(`[${new Date().toUTCString()}] Markets Observer started`);
+    logger.info('Markets Observer started');
   }
 }
 

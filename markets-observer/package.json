@@ -27,6 +27,7 @@
     "@binance-trader/shared": "file:../shared",
     "dotenv": "^16.0.1",
     "joi": "^17.6.0",
+    "pino": "^8.19.0",
     "rimraf": "^3.0.2",
     "ws": "^8.8.0"
   }
