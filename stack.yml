@@ -18,6 +18,20 @@ x-default-update-config: &default-update-config
   failure_action: rollback
 
 services:
+  rabbitmq:
+    deploy:
+      replicas: 1
+      restart_policy:
+        <<: *default-restart-policy
+      update_config:
+        <<: *default-update-config
+    healthcheck:
+      <<: *default-healthcheck
+      test: rabbitmq-diagnostics -q ping || exit 1
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=password
   markets-observer:
     deploy:
       replicas: 1
@@ -29,8 +43,6 @@ services:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
     image: jesuswebdev/binance-trader/markets-observer:${API_TAG:-c2fc59526e80b9203fc601b8b0bfe810e6260653}
-    networks:
-      - binance-trader
     environment:
       - NODE_ENV=production
     secrets:
@@ -39,9 +51,6 @@ services:
         uid: '1000'
         gid: '1000'
         mode: 0700
-
-networks:
-  binance-trader:
 
 secrets:
   markets-observer-env-v1:
