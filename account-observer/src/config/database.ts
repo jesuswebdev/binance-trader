@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { DATABASE_URI } from '.';
 import { createAccountModel } from '../entity/account/model';
 import { createOrderModel } from '../entity/order/model';
+import logger from '../utils/logger';
 
 export const initDb = async () => {
   const connection = await mongoose
@@ -13,7 +14,7 @@ export const initDb = async () => {
 
   await connection.syncIndexes();
 
-  console.log('MongoDB connection established');
+  logger.info('MongoDB connection established');
 
   return connection;
 };

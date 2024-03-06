@@ -12,10 +12,8 @@ import { Connection } from 'mongoose';
 import { AxiosInstance } from 'axios';
 import { parseAccountUpdate, parseOrder } from './utils';
 import { BINANCE_STREAM_URI, ENVIRONMENT } from './config';
+import logger from './utils/logger';
 
-function logMessage(msg: string) {
-  console.log(`[${new Date().toISOString()}] PID (${process.pid}) - ${msg}`);
-}
 export default class AccountObserver {
   private readonly allowed_pairs: Map<string, boolean>;
   private listenKeyKeepAliveInterval: NodeJS.Timer | null;
@@ -35,16 +33,9 @@ export default class AccountObserver {
     this.terminating = false;
   }
 
-  startListenKeyKeepAliveInterval() {
+  startListenKeyKeepAliveInterval(listenKey: string) {
     this.listenKeyKeepAliveInterval = setInterval(async () => {
-      const account: LeanAccountDocument = await this.database
-        .model<AccountModel>(DATABASE_MODELS.ACCOUNT)
-        .findOne({ id: ENVIRONMENT })
-        .hint('id_1')
-        .select({ spot_account_listen_key: true })
-        .lean();
-
-      await this.listenKeyKeepAlive(account.spot_account_listen_key);
+      await this.listenKeyKeepAlive(listenKey);
 
       await this.database
         .model<AccountModel>(DATABASE_MODELS.ACCOUNT)
@@ -106,7 +97,7 @@ export default class AccountObserver {
     try {
       spot_account_listen_key = await this.createListenKey();
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       spot_account_listen_key = await this.createListenKey();
     }
 
@@ -115,7 +106,7 @@ export default class AccountObserver {
     }
 
     if (account.spot_account_listen_key !== spot_account_listen_key) {
-      console.log('Using new listen key.');
+      logger.info('Using new listen key.');
     }
 
     await this.database
@@ -123,13 +114,13 @@ export default class AccountObserver {
       .updateOne({ id: ENVIRONMENT }, { $set: { spot_account_listen_key } })
       .hint('id_1');
 
-    this.startListenKeyKeepAliveInterval();
+    this.startListenKeyKeepAliveInterval(spot_account_listen_key);
 
     return spot_account_listen_key;
   }
 
   async init() {
-    logMessage('Starting Account Observer');
+    logger.info('Starting Account Observer');
 
     await this.updateBalance();
     const spot_account_listen_key = await this.getListenKey();
@@ -139,7 +130,7 @@ export default class AccountObserver {
     );
 
     this.client.on('open', () => {
-      logMessage('Spot Account Observer | Connection open');
+      logger.info('Connection open');
     });
 
     this.client.on('ping', () => {
@@ -170,7 +161,7 @@ export default class AccountObserver {
               )
               .hint('orderId_-1_symbol_-1');
           } catch (error) {
-            console.error(error);
+            logger.error(error);
             await this.database
               .model<OrderModel>(DATABASE_MODELS.ORDER)
               .updateOne(
@@ -207,16 +198,18 @@ export default class AccountObserver {
       }
     });
 
-    this.client.on('error', () => {
-      logMessage('Spot Orders Observer | ERROR');
+    this.client.on('error', (error: Error) => {
+      logger.error(error);
       this.database.destroy().then(() => {
         process.exit();
       });
     });
 
     this.client.on('close', (code, reason) => {
-      logMessage('Spot Orders Observer Stream closed');
-      logMessage(`Code: ${code}, Reason: ${reason.toString()}`);
+      logger.info(
+        { code, info: reason.toString() },
+        'Spot Orders Observer Stream closed',
+      );
 
       if (!this.terminating) {
         this.init();
@@ -228,7 +221,7 @@ export default class AccountObserver {
   }
 
   private terminate() {
-    logMessage('Terminating Account Observer');
+    logger.info('Terminating Account Observer');
 
     this.database.destroy().then(() => {
       const client = this.client;
@@ -238,7 +231,7 @@ export default class AccountObserver {
 
         client.terminate();
 
-        logMessage('Account Observer terminated');
+        logger.info('Account Observer terminated');
 
         process.exit();
       }
