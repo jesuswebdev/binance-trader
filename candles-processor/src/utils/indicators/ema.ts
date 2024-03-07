@@ -7,13 +7,13 @@ interface getEMAFunction {
       periods?: number;
       all?: boolean;
       parseFn: (v: number) => number | null;
-    }
+    },
   ): Promise<{ ema: number | number[] | null }>;
 }
 
 export const getEMA: getEMAFunction = function getEMA(
   data,
-  { periods = 5, all = false, parseFn }
+  { periods = 5, all = false, parseFn },
 ) {
   return new Promise((resolve, reject) => {
     tulind.indicators.ema.indicator(
@@ -30,12 +30,12 @@ export const getEMA: getEMAFunction = function getEMA(
           const values = res ?? [];
 
           return resolve({
-            ema: parseFn ? (values.map(parseFn) as number[]) : values
+            ema: parseFn ? (values.map(parseFn) as number[]) : values,
           });
         }
 
         return resolve({ ema: parseFn ? parseFn(ema) : ema });
-      }
+      },
     );
   });
 };

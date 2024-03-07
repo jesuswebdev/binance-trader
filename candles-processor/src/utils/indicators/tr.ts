@@ -6,7 +6,7 @@ interface getTRFunction {
     options: {
       all?: boolean;
       parseFn: (v: number) => number | null;
-    }
+    },
   ): Promise<{ tr: number | number[] }>;
 }
 
@@ -29,12 +29,12 @@ export const getTR: getTRFunction = function getTR(data, { all, parseFn }) {
           const values = res ?? [];
 
           return resolve({
-            tr: parseFn ? (values.map(parseFn) as number[]) : values
+            tr: parseFn ? (values.map(parseFn) as number[]) : values,
           });
         }
 
         return resolve({ tr: parseFn ? (parseFn(tr) as number) : tr });
-      }
+      },
     );
   });
 };

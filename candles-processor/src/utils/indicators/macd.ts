@@ -3,7 +3,7 @@ import tulind from 'tulind';
 interface getMACDFunction {
   (
     data: [number[]],
-    options: { parseFn: (v: number) => number | null }
+    options: { parseFn: (v: number) => number | null },
   ): Promise<{
     macd: number | null;
     macd_signal: number | null;
@@ -30,9 +30,9 @@ export const getMACD: getMACDFunction = function getMACD(data, { parseFn }) {
         return resolve({
           macd: parseFn(macd),
           macd_signal: parseFn(macd_signal),
-          macd_histogram: parseFn(macd_histogram)
+          macd_histogram: parseFn(macd_histogram),
         });
-      }
+      },
     );
   });
 };

@@ -3,7 +3,10 @@ import { getEMA } from './index';
 import { nz } from '@binance-trader/shared';
 
 interface getEMASlopeFunction {
-  (data: OHLC, options: { parseFn: (v: number) => number | null }): Promise<{
+  (
+    data: OHLC,
+    options: { parseFn: (v: number) => number | null },
+  ): Promise<{
     ema_50: number | null;
     ema_50_slope: number | null;
   }>;

@@ -8,7 +8,7 @@ interface getATRFunction {
       periods?: number;
       sma?: boolean;
       parseFn: (v: number) => number | null;
-    }
+    },
   ): Promise<{
     atr: number | null;
     atr_sma?: number | null;
@@ -17,7 +17,7 @@ interface getATRFunction {
 
 export const getATR: getATRFunction = function getATR(
   data: [number[], number[], number[]],
-  { periods = 14, sma = true, parseFn }
+  { periods = 14, sma = true, parseFn },
 ) {
   return new Promise((resolve, reject) => {
     tulind.indicators.atr.indicator(
@@ -37,7 +37,7 @@ export const getATR: getATRFunction = function getATR(
         const { sma: atr_sma } = await getSMA([res], { periods: 28, parseFn });
 
         return resolve({ atr: parseFn ? parseFn(atr) : atr, atr_sma });
-      }
+      },
     );
   });
 };

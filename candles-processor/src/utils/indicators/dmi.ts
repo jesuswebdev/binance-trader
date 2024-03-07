@@ -7,13 +7,13 @@ interface tulindFunction<T> {
     options: {
       periods?: number;
       parseFn: (v: number) => number | null;
-    }
+    },
   ): Promise<T>;
 }
 
 const getADX: tulindFunction<{ adx: number | null }> = function getADX(
   data,
-  { periods = 14, parseFn }
+  { periods = 14, parseFn },
 ) {
   return new Promise((resolve, reject) => {
     tulind.indicators.adx.indicator(
@@ -23,18 +23,8 @@ const getADX: tulindFunction<{ adx: number | null }> = function getADX(
         reject,
         resolve,
         parseFn,
-        properties: ['adx']
-      })
-
-      //   (err: unknown, [res]: [number[]]) => {
-      //     if (err) {
-      //       return reject(err);
-      //     }
-
-      //     const adx = res[res.length - 1] ?? null;
-
-      //     return resolve(validateValue(res.pop()));
-      //   }
+        properties: ['adx'],
+      }),
     );
   });
 };
@@ -51,17 +41,8 @@ const getDI: tulindFunction<{
         reject,
         resolve,
         parseFn,
-        properties: ['plus_di', 'minus_di']
-      })
-      //     (err, res) => {
-      //   if (err) {
-      //     return reject(err);
-      //   }
-      //   return resolve({
-      //     plus_di: validateValue(res[0].pop()),
-      //     minus_di: validateValue(res[1].pop())
-      //   });
-      // }
+        properties: ['plus_di', 'minus_di'],
+      }),
     );
   });
 };

@@ -7,7 +7,7 @@ interface getOBVFunction {
     options: {
       ema?: boolean;
       parseFn: (v: number) => number | null;
-    }
+    },
   ): Promise<{
     obv: number | null;
     obv_ema?: number | null;
@@ -16,7 +16,7 @@ interface getOBVFunction {
 
 export const getOBV: getOBVFunction = function getOBV(
   data,
-  { ema = true, parseFn }
+  { ema = true, parseFn },
 ) {
   return new Promise((resolve, reject) => {
     tulind.indicators.obv.indicator(
@@ -35,11 +35,11 @@ export const getOBV: getOBVFunction = function getOBV(
 
         const { ema: obv_ema } = (await getEMA([res], {
           periods: 28,
-          parseFn
+          parseFn,
         })) as Record<string, number>;
 
         return resolve({ obv: parseFn(obv), obv_ema });
-      }
+      },
     );
   });
 };

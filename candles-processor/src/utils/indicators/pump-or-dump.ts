@@ -3,7 +3,10 @@ import { getSMA } from './index';
 import { nz } from '@binance-trader/shared';
 
 interface getPumpOrDumpFunction {
-  (data: OHLC, options: { parseFn: (v: number) => number | null }): Promise<{
+  (
+    data: OHLC,
+    options: { parseFn: (v: number) => number | null },
+  ): Promise<{
     is_pump: boolean;
   }>;
 }
