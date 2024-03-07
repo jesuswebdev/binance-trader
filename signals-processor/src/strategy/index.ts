@@ -33,9 +33,9 @@ export const applyStrategy = function applyStrategy(
     return;
   }
 
-  const macd =
-    currentCandle.macd > currentCandle.macd_signal &&
-    (currentCandle.macd > 0 || currentCandle.macd_histogram > 0);
+  // const macd =
+  //   currentCandle.macd > currentCandle.macd_signal &&
+  //   (currentCandle.macd > 0 || currentCandle.macd_histogram > 0);
 
   const di =
     currentCandle.adx > 20 &&
@@ -48,7 +48,7 @@ export const applyStrategy = function applyStrategy(
     .every((candle) => candle.ema_50_slope === 1);
   const green_candles = candles
     .slice(-2)
-    .every((candle) => candle.close_price > candle.open_price);
+    .every((candle) => candle.ha_close > candle.ha_open);
 
   const trending =
     previousCandle.trend === 1 &&
@@ -63,7 +63,13 @@ export const applyStrategy = function applyStrategy(
 
   const notPump = !(currentCandle.is_pump || previousCandle.is_pump);
 
-  const triggerSignal = volume && volatile && trending && di && macd && notPump;
+  const triggerSignal =
+    volume &&
+    volatile &&
+    trending &&
+    di &&
+    //  && macd
+    notPump;
 
   if (!triggerSignal) {
     return;

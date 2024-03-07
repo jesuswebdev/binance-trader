@@ -32,6 +32,7 @@ const env = validateObjectSchema(
       .integer()
       .positive()
       .default(365 * 24),
+    HEALTHCHECK_PORT: joi.number().port().default(8080),
   }),
 );
 
@@ -55,3 +56,5 @@ export const SIGNAL_HOURS_LOOKUP =
   +(env.SIGNAL_HOURS_LOOKUP ?? 0) * MILLISECONDS.HOUR;
 export const LAST_POSITION_HOURS_LOOKUP =
   +(env.LAST_POSITION_HOURS_LOOKUP ?? 0) * MILLISECONDS.HOUR;
+
+export const HEALTHCHECK_PORT = env.HEALTHCHECK_PORT;

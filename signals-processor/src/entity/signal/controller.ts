@@ -29,6 +29,7 @@ import {
 import { LAST_POSITION_HOURS_LOOKUP, SIGNAL_HOURS_LOOKUP } from '../../config';
 import { applyStrategy } from '../../strategy';
 import { getPlainCandle } from '../../utils';
+import logger from '../../utils/logger';
 
 type ServicesProps = {
   database: Connection;
@@ -167,9 +168,9 @@ export const processSignals = async function processSignals({
         });
       } catch (error: unknown) {
         if ((error as MongoError).code === 11000) {
-          console.error(`Trying to create duplicate signal with ID '${id}'`);
+          logger.error(`Trying to create duplicate signal with ID '${id}'`);
         }
-        console.error(error);
+        logger.error(error);
       }
     }
 
@@ -242,7 +243,7 @@ export const processSignals = async function processSignals({
 
         return Promise.resolve();
       } catch (error: unknown) {
-        console.error(error);
+        logger.error(error);
       }
     },
   );
