@@ -9,6 +9,7 @@ import {
   BINANCE_API_KEY,
   BINANCE_API_SECRET,
   BINANCE_API_URL,
+  HEALTHCHECK_PORT,
   MESSAGE_BROKER_URI,
 } from './config';
 import { initDb } from './config/database';
@@ -19,8 +20,17 @@ import {
   processCandleTick,
 } from './entity/candle/controller';
 import logger from './utils/logger';
+import http from 'http';
 
 const start = async () => {
+  http
+    .createServer(function (_, res) {
+      res.statusCode = 200;
+      res.write('OK');
+      res.end();
+    })
+    .listen(HEALTHCHECK_PORT);
+
   logger.info('Starting Candles Processor');
 
   const binance = getBinanceInstance({
