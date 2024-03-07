@@ -203,6 +203,11 @@ export const processCandles = async function processCandles({
     let cachedCandles: LeanCandleDocument[];
 
     if (!cachedCandlesValue) {
+      // get the last 150 candles from this candle open time to the past
+      // and store it in redis as cached candles
+      // this way we avoid querying this much data every time we need the candles
+      // once we need to process a new candle, a new array of candles will be cached
+
       cachedCandles = await candleModel
         .find({
           $and: [
