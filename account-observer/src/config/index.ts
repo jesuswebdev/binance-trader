@@ -31,6 +31,7 @@ const env = validateObjectSchema(
     BINANCE_API_URL: joi.string().trim().uri().required(),
     BINANCE_API_KEY: joi.string().trim().base64().required(),
     BINANCE_API_SECRET: joi.string().trim().base64().required(),
+    HEALTHCHECK_PORT: joi.number().port().default(8080),
   }),
 );
 
@@ -50,3 +51,4 @@ export const BINANCE_STREAM_URI = env.BINANCE_STREAM_URI ?? '';
 export const BINANCE_API_URL = env.BINANCE_API_URL ?? '';
 export const BINANCE_API_KEY = env.BINANCE_API_KEY ?? '';
 export const BINANCE_API_SECRET = env.BINANCE_API_SECRET ?? '';
+export const HEALTHCHECK_PORT = env.HEALTHCHECK_PORT;

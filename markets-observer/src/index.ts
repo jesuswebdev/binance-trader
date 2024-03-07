@@ -1,5 +1,5 @@
 import { PAIRS } from '@binance-trader/shared';
-import { CANDLE_INTERVAL } from './config';
+import { CANDLE_INTERVAL, HEALTHCHECK_PORT } from './config';
 import { Observer } from './observer';
 import http from 'http';
 
@@ -10,7 +10,7 @@ const start = () => {
       res.write('OK');
       res.end();
     })
-    .listen(8080);
+    .listen(HEALTHCHECK_PORT);
 
   const observer = new Observer({
     markets: PAIRS,

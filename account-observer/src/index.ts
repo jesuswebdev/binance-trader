@@ -1,5 +1,10 @@
 import getBinanceInstance from '@binance-trader/shared/build/binance-instance-creator';
-import { BINANCE_API_KEY, BINANCE_API_SECRET, BINANCE_API_URL } from './config';
+import {
+  BINANCE_API_KEY,
+  BINANCE_API_SECRET,
+  BINANCE_API_URL,
+  HEALTHCHECK_PORT,
+} from './config';
 import { initDb } from './config/database';
 import Observer from './observer';
 import http from 'http';
@@ -11,7 +16,7 @@ const start = async () => {
       res.write('OK');
       res.end();
     })
-    .listen(8080);
+    .listen(HEALTHCHECK_PORT);
 
   const db = await initDb();
 

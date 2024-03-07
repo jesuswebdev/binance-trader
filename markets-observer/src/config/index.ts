@@ -22,6 +22,7 @@ const env = validateObjectSchema(
     MESSAGE_BROKER_HOST: joi.string().trim().hostname().required(),
     MESSAGE_BROKER_USER: joi.string().trim().required(),
     MESSAGE_BROKER_PASSWORD: joi.string().trim().required(),
+    HEALTHCHECK_PORT: joi.number().port().default(8080),
   }),
 );
 
@@ -33,3 +34,4 @@ export const BINANCE_STREAM_URI = env.BINANCE_STREAM_URI ?? '';
 export const MESSAGE_BROKER_URI =
   `${env.MESSAGE_BROKER_PROTOCOL}://${env.MESSAGE_BROKER_USER}:${env.MESSAGE_BROKER_PASSWORD}@${env.MESSAGE_BROKER_HOST}` ??
   '';
+export const HEALTHCHECK_PORT = env.HEALTHCHECK_PORT;
