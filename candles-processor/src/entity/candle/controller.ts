@@ -306,7 +306,7 @@ export const fillCandlesData = async function fillCandlesData({
   for (const pair of PAIRS) {
     const symbol = pair.symbol;
     const interval = CANDLE_INTERVAL;
-    logger.info('Filling candles data for pair: ', symbol);
+    logger.info(`Filling candles data for pair: ${symbol}`);
 
     const count = await candleModel
       .countDocuments({
@@ -360,7 +360,7 @@ export const fillCandlesData = async function fillCandlesData({
       }
     }
 
-    logger.info('Finished filling candles data for pair: ', symbol);
+    logger.info(`Finished filling candles data for pair: ${symbol}`);
   }
 
   //remove lock
