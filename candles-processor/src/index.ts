@@ -18,13 +18,10 @@ import {
   processCandles,
   processCandleTick,
 } from './entity/candle/controller';
-
-function logMessage(msg: string) {
-  console.log(`[${new Date().toISOString()}] PID (${process.pid}) - ${msg}`);
-}
+import logger from './utils/logger';
 
 const start = async () => {
-  logMessage('Starting Candles Processor');
+  logger.info('Starting Candles Processor');
 
   const binance = getBinanceInstance({
     apiUrl: BINANCE_API_URL,
@@ -45,18 +42,18 @@ const start = async () => {
   ]);
 
   const terminate = () => {
-    logMessage('Exiting Candles Processor');
+    logger.info('Exiting Candles Processor');
 
     Promise.all([db.destroy(), redis.disconnect(), broker.close()]).then(() => {
-      logMessage('Candles Processor terminated');
-      process.exit();
+      logger.info('Candles Processor terminated');
+      process.exit(1);
     });
   };
 
   process.on('SIGINT', terminate);
   process.on('SIGTERM', terminate);
   process.on('unhandledRejection', (reason) => {
-    console.error(reason);
+    logger.error(reason);
     terminate();
   });
 
@@ -78,13 +75,13 @@ const start = async () => {
   broker
     .listen(CANDLE_EVENTS.CANDLE_TICK, msgHandler)
     .catch((error: unknown) => {
-      console.error(error);
+      logger.error(error);
       throw error;
     });
 
   await fillCandlesData({ database: db, redis, binance });
 
-  logMessage('Candles Processor started');
+  logger.info('Candles Processor started');
 };
 
 start();

@@ -29,6 +29,7 @@ import {
   RedisModules,
   RedisScripts,
 } from 'redis';
+import logger from '../../utils/logger';
 
 type ServicesProps = {
   binance: AxiosInstance;
@@ -285,7 +286,7 @@ export const fillCandlesData = async function fillCandlesData({
   const candleModel: CandleModel = database.model(DATABASE_MODELS.CANDLE);
   const marketModel: MarketModel = database.model(DATABASE_MODELS.MARKET);
 
-  console.log('Attempting to fill candles data...');
+  logger.info('Attempting to fill candles data...');
 
   const lockKey = `${ENVIRONMENT}_candles_update_lock`;
 
@@ -294,7 +295,7 @@ export const fillCandlesData = async function fillCandlesData({
 
   // if lock is set return
   if (candlesUpdateLock) {
-    console.log('Unable to continue. Update Candles Lock is set.');
+    logger.warn('Unable to continue. Update Candles Lock is set.');
 
     return;
   }
@@ -305,7 +306,7 @@ export const fillCandlesData = async function fillCandlesData({
   for (const pair of PAIRS) {
     const symbol = pair.symbol;
     const interval = CANDLE_INTERVAL;
-    console.log('Current pair: ', symbol);
+    logger.info('Filling candles data for pair: ', symbol);
 
     const count = await candleModel
       .countDocuments({
@@ -358,10 +359,12 @@ export const fillCandlesData = async function fillCandlesData({
         });
       }
     }
+
+    logger.info('Finished filling candles data for pair: ', symbol);
   }
 
   //remove lock
   await redis.del(lockKey);
 
-  console.log('Finished filling candles data');
+  logger.info('Finished filling candles data');
 };
