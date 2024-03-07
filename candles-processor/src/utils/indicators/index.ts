@@ -13,6 +13,7 @@ export * from './sma';
 export * from './supertrend';
 export * from './tr';
 export * from './volume-trend';
+export * from './heiken-ashi';
 
 interface GenericCallback {
   (

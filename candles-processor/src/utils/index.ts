@@ -20,6 +20,7 @@ import {
   getPumpOrDump,
   getSupertrend,
   getVolumeTrend,
+  getHeikenAshi,
 } from './indicators';
 import { OHLC } from './interfaces';
 
@@ -158,6 +159,7 @@ export const getIndicatorsValues = async function getIndicatorsValues(
     mama: parseFn(mesa_result.mama),
     fama: parseFn(mesa_result.fama),
     ...getVolumeTrend(ohlc),
+    ...getHeikenAshi(candles),
   };
 };
 
