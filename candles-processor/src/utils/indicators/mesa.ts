@@ -27,18 +27,18 @@ export const getMESA = function getMESA(hl2: number[]) {
     fama: [],
   };
 
-  const fillWithZeros = (o: Record<string, number[]>) => {
-    for (const key in o) {
-      o[key].unshift(0);
+  const fillWithZeros = (object: Record<string, number[]>) => {
+    for (const key in object) {
+      object[key].unshift(0);
     }
   };
 
-  const compute = (a: number[], p: number) =>
-    (0.0962 * a[0] +
-      0.5769 * nz(a[2]) -
-      0.5769 * nz(a[4]) -
-      0.0962 * nz(a[6])) *
-    (0.075 * nz(p) + 0.54);
+  const compute = (array: number[], period: number) =>
+    (0.0962 * array[0] +
+      0.5769 * nz(array[2]) -
+      0.5769 * nz(array[4]) -
+      0.0962 * nz(array[6])) *
+    (0.075 * nz(period) + 0.54);
 
   hl2.forEach((current, index, array) => {
     if (index < 5) {

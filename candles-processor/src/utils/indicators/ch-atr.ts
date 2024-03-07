@@ -3,7 +3,10 @@ import { OHLC } from '../interfaces';
 import { getEMA, getTR, getRMA } from './index';
 
 interface getCHATRFunction {
-  (candles: LeanCandleDocument[], ohlc: OHLC): Promise<
+  (
+    candles: LeanCandleDocument[],
+    ohlc: OHLC,
+  ): Promise<
     | {
         ch_atr: number;
         ch_atr_ema: number;
@@ -28,7 +31,7 @@ export const getCHATR: getCHATRFunction = async function getCHATR(
   })) as Record<string, number[]>;
 
   const { rma } = await getRMA(tr, { periods: 10, parseFn: nz });
-  const atrp = rma.map((t, i) => (t / close[i]) * 100);
+  const atrp = rma.map((range, i) => (range / close[i]) * 100);
   const { ema: avg } = (await getEMA([atrp], {
     periods: 28,
     parseFn: nz,

@@ -146,8 +146,11 @@ export const getIndicatorsValues = async function getIndicatorsValues(
     getPumpOrDump(ohlc, { parseFn }),
   ];
 
-  const p = await Promise.all(promises);
-  const result = p.reduce((acc, v) => ({ ...acc, ...v }), {});
+  const resolvedPromises = await Promise.all(promises);
+  const result = resolvedPromises.reduce(
+    (acc, value) => ({ ...acc, ...value }),
+    {},
+  );
   const mesa_result = getMESA(hl2);
 
   return {
@@ -179,7 +182,7 @@ const getCumulativeIndicator = async ({
       const acc = await p_acc;
       const sliced_candles = array.slice(0, index + 1).map((sliced) => ({
         ...sliced,
-        ...getter(acc.find((v) => v.id === sliced.id) ?? {}),
+        ...getter(acc.find((value) => value.id === sliced.id) ?? {}),
       }));
       const sliced_ohlc = Object.entries(ohlc).reduce(
         (acc, [key, value]) => ({ ...acc, [key]: value.slice(0, index + 1) }),
@@ -190,7 +193,7 @@ const getCumulativeIndicator = async ({
 
       return acc.concat({ ...candle, ...value });
     }, Promise.resolve<LeanCandleDocument[]>([]))
-    .then((r) => getter(r[r.length - 1]));
+    .then((candles) => getter(candles[candles.length - 1]));
 
   return result;
 };

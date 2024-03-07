@@ -23,14 +23,14 @@ interface GenericCallback {
       properties: string[];
     },
     error: unknown,
-    result: [number[]]
+    result: [number[]],
   ): void;
 }
 
 export const genericCallback: GenericCallback = function genericCallback(
   { resolve, reject, parseFn, properties },
   error,
-  result
+  result,
 ) {
   if (error) {
     return reject(error);
@@ -40,8 +40,8 @@ export const genericCallback: GenericCallback = function genericCallback(
 
   properties.forEach((property, index) => {
     const res = result[index];
-    const v = res[res.length - 1] ?? null;
-    aux[property] = parseFn ? parseFn(v) : v;
+    const value = res[res.length - 1] ?? null;
+    aux[property] = parseFn ? parseFn(value) : value;
   });
 
   return resolve(aux);
