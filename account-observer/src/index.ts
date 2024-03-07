@@ -8,27 +8,26 @@ import {
 import { initDb } from './config/database';
 import Observer from './observer';
 import http from 'http';
+import logger from './utils/logger';
 
-const start = async () => {
-  http
-    .createServer(function (_, res) {
-      res.statusCode = 200;
-      res.write('OK');
-      res.end();
-    })
-    .listen(HEALTHCHECK_PORT);
+http
+  .createServer(function (_, res) {
+    res.statusCode = 200;
+    res.write('OK');
+    res.end();
+  })
+  .listen(HEALTHCHECK_PORT)
+  .on('error', (error) => logger.error(error))
+  .on('listening', async () => {
+    const db = await initDb();
 
-  const db = await initDb();
+    const binance = getBinanceInstance({
+      apiUrl: BINANCE_API_URL,
+      apiKey: BINANCE_API_KEY,
+      apiSecret: BINANCE_API_SECRET,
+    });
 
-  const binance = getBinanceInstance({
-    apiUrl: BINANCE_API_URL,
-    apiKey: BINANCE_API_KEY,
-    apiSecret: BINANCE_API_SECRET,
+    const observer = new Observer(db, binance);
+
+    observer.init();
   });
-
-  const observer = new Observer(db, binance);
-
-  observer.init();
-};
-
-start();
