@@ -8,10 +8,10 @@ import {
   PositionModel,
   POSITION_SELL_TRIGGER,
   POSITION_STATUS,
-  MILLISECONDS,
 } from '@binance-trader/shared';
 import { Connection } from 'mongoose';
 import { getTSL } from '../utils/getTrailingStopLoss';
+import { WAIT_SECONDS_BEFORE_SELLING } from '../config';
 
 export const applyStrategy = async function applyStrategy(
   database: Connection,
@@ -91,7 +91,8 @@ export const applyStrategy = async function applyStrategy(
 
       const take_profit_time_passed =
         position.take_profit_trigger_time &&
-        Date.now() - position.take_profit_trigger_time > MILLISECONDS.MINUTE;
+        Date.now() - position.take_profit_trigger_time >
+          WAIT_SECONDS_BEFORE_SELLING;
 
       // remove timer
       if (
@@ -142,7 +143,8 @@ export const applyStrategy = async function applyStrategy(
 
       const stop_loss_time_passed =
         position.stop_loss_trigger_time &&
-        Date.now() - position.stop_loss_trigger_time > MILLISECONDS.MINUTE;
+        Date.now() - position.stop_loss_trigger_time >
+          WAIT_SECONDS_BEFORE_SELLING;
 
       // remove timer
       if (
@@ -212,7 +214,7 @@ export const applyStrategy = async function applyStrategy(
       const trailing_stop_loss_time_passed =
         position.trailing_stop_loss_trigger_time &&
         Date.now() - position.trailing_stop_loss_trigger_time >
-          MILLISECONDS.MINUTE;
+          WAIT_SECONDS_BEFORE_SELLING;
 
       // remove timer
       if (
