@@ -870,7 +870,7 @@ export async function cancelUnfilledOrders({
           continue;
         }
 
-        if (order.side === 'SELL') {
+        if (order.side === SIGNAL_TYPES.SELL) {
           const position = await positionModel
             .findOne({ 'sell_order.orderId': order.orderId })
             .hint('sell_order.orderId_1')

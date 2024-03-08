@@ -17,11 +17,13 @@ import {
 } from './config';
 import { initDb } from './config/database';
 import {
+  cancelUnfilledOrders,
   createBuyOrder,
   createSellOrder,
   createSellOrderForCanceledOrder,
 } from './entity/order/controller';
 import logger from './utils/logger';
+import cron from 'node-cron';
 
 http
   .createServer(function (_, res) {
@@ -143,6 +145,14 @@ http
         { deadLetterExchange: EXCHANGE_TYPES.DEAD_LETTER },
       )
       .catch(errorHandler);
+
+    cron.schedule('* * * * *', () =>
+      cancelUnfilledOrders({
+        database: db,
+        binance,
+        broker,
+      }).catch(logger.error),
+    );
 
     logger.info('Trader started');
   });
