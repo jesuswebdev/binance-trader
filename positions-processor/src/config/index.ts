@@ -7,9 +7,12 @@ import {
   MILLISECONDS,
 } from '@binance-trader/shared';
 
-if (process.env.NODE_ENV !== ENVIRONMENT_TYPES.PRODUCTION) {
-  dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-}
+dotenv.config({
+  path: path.resolve(
+    __dirname,
+    `../../.env.${process.env.NODE_ENV ?? ENVIRONMENT_TYPES.DEVELOPMENT}`,
+  ),
+});
 
 const env = validateObjectSchema(
   process.env,
@@ -26,6 +29,7 @@ const env = validateObjectSchema(
     MESSAGE_BROKER_PASSWORD: joi.string().trim().required(),
     WAIT_SECONDS_BEFORE_SELLING: joi.number().integer().positive().required(),
     POSITION_TAKE_PROFIT: joi.number().integer().positive().required(),
+    HEALTHCHECK_PORT: joi.number().port().default(8080),
   }),
 );
 
@@ -47,3 +51,4 @@ export const WAIT_SECONDS_BEFORE_SELLING =
   +(env.WAIT_SECONDS_BEFORE_SELLING ?? 0) * MILLISECONDS.SECOND;
 
 export const POSITION_TAKE_PROFIT = +(env.POSITION_TAKE_PROFIT ?? 0);
+export const HEALTHCHECK_PORT = env.HEALTHCHECK_PORT;
