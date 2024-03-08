@@ -102,9 +102,7 @@ export const processSignals = async function processSignals({
     .hint('symbol_1_open_time_1');
 
   if (count < 150) {
-    await removeLock();
-
-    return;
+    return removeLock();
   }
 
   //last 10
@@ -174,9 +172,7 @@ export const processSignals = async function processSignals({
       }
     }
 
-    await removeLock();
-
-    return;
+    return removeLock();
   }
 
   const updated_signals_promises = open_signals.map(
@@ -250,7 +246,5 @@ export const processSignals = async function processSignals({
 
   await Promise.all(updated_signals_promises);
 
-  await removeLock();
-
-  return;
+  return removeLock();
 };
