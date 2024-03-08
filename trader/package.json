@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node build/index.js",
     "start:dev": "ts-node ./src/index",
+    "lint": "./node_modules/eslint/bin/eslint.js ./src/**",
     "build": "rimraf build && node_modules/typescript/bin/tsc"
   },
   "keywords": [],
