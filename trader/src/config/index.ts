@@ -65,6 +65,7 @@ const env = validateObjectSchema(
       }),
       {},
     ),
+    HEALTHCHECK_PORT: joi.number().port().default(8080),
   }),
 );
 
@@ -110,3 +111,5 @@ export const BINANCE_API_SECRET = env.BINANCE_API_SECRET ?? '';
 
 export const BUY_ORDER_TYPE = env.BUY_ORDER_TYPE ?? '';
 export const SELL_ORDER_TYPE = env.SELL_ORDER_TYPE ?? '';
+
+export const HEALTHCHECK_PORT = env.HEALTHCHECK_PORT;
