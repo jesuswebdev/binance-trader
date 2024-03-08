@@ -4,6 +4,7 @@ import { createAccountModel } from '../entity/account/model';
 import { createMarketModel } from '../entity/market/model';
 import { createOrderModel } from '../entity/order/model';
 import { createPositionModel } from '../entity/position/model';
+import logger from '../utils/logger';
 
 export const initDb = async () => {
   const connection = await mongoose
@@ -17,7 +18,7 @@ export const initDb = async () => {
 
   await connection.syncIndexes();
 
-  console.log('MongoDB connection established');
+  logger.info('MongoDB connection established');
 
   return connection;
 };
