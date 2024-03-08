@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node build/index.js",
     "start:dev": "ts-node ./src/index",
+    "lint": "./node_modules/eslint/bin/eslint.js ./src/**",
+    "prettier": "npx prettier ./src --write",
     "build": "rimraf build && node_modules/typescript/bin/tsc"
   },
   "keywords": [],
@@ -15,6 +17,7 @@
     "@typescript-eslint/eslint-plugin": "^5.29.0",
     "@typescript-eslint/parser": "^5.29.0",
     "eslint": "^8.18.0",
+    "prettier": "3.2.5",
     "ts-node": "^10.8.1",
     "typescript": "^4.7.4"
   },
