@@ -13,7 +13,10 @@ import {
   toSymbolPrecision,
 } from '@binance-trader/shared';
 import { Connection, Types } from 'mongoose';
-import { POSITION_TAKE_PROFIT } from '../../config';
+import {
+  POSITION_ARM_TRAILING_STOP_LOSS,
+  POSITION_TAKE_PROFIT,
+} from '../../config';
 import { applyStrategy } from '../../strategy';
 
 type ServicesProps = {
@@ -38,49 +41,36 @@ export const processOpenPositions = async function processOpenPositions({
 
   const results = await applyStrategy(database, candle);
 
-  if (results.length > 0) {
-    for (const result of results) {
-      if (!result) {
-        continue;
-      }
+  for (const result of results) {
+    if (!result) {
+      continue;
+    }
 
-      const { position, candle, sell_trigger } = result;
+    const { position, candle, sell_trigger } = result;
 
-      try {
-        if (position) {
-          const sell_price = toSymbolPrecision(
-            candle.close_price,
-            candle.symbol,
-          );
+    if (position) {
+      const sell_price = toSymbolPrecision(candle.close_price, candle.symbol);
 
-          const closedPosition = await positionModel.findOneAndUpdate(
-            { _id: position._id },
-            {
-              $set: {
-                sell_price,
-                close_date: new Date(),
-                close_time: Date.now(),
-                status: POSITION_STATUS.CLOSED,
-                change: getChange(candle.close_price, position.buy_price),
-                sell_trigger,
-                sell_candle: candle,
-              },
-            },
-            { new: true },
-          );
+      const closedPosition = await positionModel.findOneAndUpdate(
+        { _id: position._id },
+        {
+          $set: {
+            sell_price,
+            close_date: new Date(),
+            close_time: Date.now(),
+            status: POSITION_STATUS.CLOSED,
+            change: getChange(candle.close_price, position.buy_price),
+            sell_trigger,
+            sell_candle: candle,
+          },
+        },
+        { new: true },
+      );
 
-          broker.publish(POSITION_EVENTS.POSITION_CLOSED, closedPosition, {
-            expiration: undefined,
-          });
-        }
-      } catch (error) {
-        await positionModel
-          .updateOne(
-            { _id: new Types.ObjectId(position._id) },
-            { $set: { status: POSITION_STATUS.OPEN } },
-          )
-          .hint('_id_');
-        throw error;
+      if (closedPosition) {
+        broker.publish(POSITION_EVENTS.POSITION_CLOSED, closedPosition, {
+          expiration: undefined,
+        });
       }
     }
   }
@@ -95,9 +85,7 @@ export const createPosition = async function createPosition({
   const signalModel: SignalModel = database.model(DATABASE_MODELS.SIGNAL);
 
   const signal = await signalModel
-    .findOne({
-      id: signalFromMsg.id,
-    })
+    .findOne({ id: signalFromMsg.id })
     .hint('_id_');
 
   if (!signal) {
@@ -121,6 +109,10 @@ export const createPosition = async function createPosition({
       signal.symbol,
     ),
     stop_loss: toSymbolPrecision(stop_loss, signal.symbol),
+    arm_trailing_stop_loss: toSymbolPrecision(
+      price * (1 + POSITION_ARM_TRAILING_STOP_LOSS / 100),
+      signal.symbol,
+    ),
     trigger: signal.trigger,
     signal: signal._id,
     last_stop_loss_update: Date.now(),

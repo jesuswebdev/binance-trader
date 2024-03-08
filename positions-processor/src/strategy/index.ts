@@ -8,10 +8,10 @@ import {
   PositionModel,
   POSITION_SELL_TRIGGER,
   POSITION_STATUS,
-  toSymbolPrecision,
+  MILLISECONDS,
 } from '@binance-trader/shared';
-import { Connection, Types } from 'mongoose';
-import { WAIT_SECONDS_BEFORE_SELLING } from '../config';
+import { Connection } from 'mongoose';
+import { getTSL } from '../utils/getTrailingStopLoss';
 
 export const applyStrategy = async function applyStrategy(
   database: Connection,
@@ -52,7 +52,7 @@ export const applyStrategy = async function applyStrategy(
     the last candle when maintenance started and when it finished
   */
 
-  const [previous_candle, candle] = candles.slice(-2);
+  const [candle] = candles.slice(-1);
 
   const positions: LeanPositionDocument[] = await positionModel
     .find({
@@ -73,63 +73,97 @@ export const applyStrategy = async function applyStrategy(
 
   const result = await Promise.all(
     positions.map(async (position) => {
-      if (!candle || !previous_candle) {
+      /**
+       *  =========== TAKE PROFIT ===========
+       */
+
+      // set timer
+      if (
+        +candle.close_price >= position.take_profit &&
+        !position.take_profit_trigger_time
+      ) {
+        await positionModel.findByIdAndUpdate(position._id, {
+          $set: { take_profit_trigger_time: Date.now() },
+        });
+
         return;
       }
 
+      const take_profit_time_passed =
+        position.take_profit_trigger_time &&
+        Date.now() - position.take_profit_trigger_time > MILLISECONDS.MINUTE;
+
+      // remove timer
       if (
-        candle.atr_stop !== position.stop_loss &&
-        candle.atr_stop < candle.open_price
+        position.take_profit_trigger_time &&
+        take_profit_time_passed &&
+        +candle.close_price < position.take_profit
       ) {
-        await positionModel
-          .updateOne(
-            { _id: new Types.ObjectId(position._id) },
-            {
-              $set: {
-                stop_loss: toSymbolPrecision(candle.atr_stop, candle.symbol),
-              },
-            },
-          )
-          .hint('_id_');
+        await positionModel.findByIdAndUpdate(position._id, {
+          $unset: { take_profit_trigger_time: true },
+        });
+
+        return;
       }
 
-      const downwards_ema_slope =
-        previous_candle.ema_50_slope === -1 && candle.ema_50_slope === -1;
-      const downwards_trend = candle.trend === -1;
+      // execute action
 
-      const sell_condition =
-        ((previous_candle.atr_stop < previous_candle.open_price &&
-          previous_candle.atr_stop < candle.atr_stop &&
-          candle.close_price < candle.atr_stop) ||
-          (previous_candle.atr_stop > previous_candle.open_price &&
-            candle.open_price < candle.atr_stop &&
-            candle.close_price < candle.atr_stop)) &&
-        (downwards_ema_slope || downwards_trend);
-
-      if (sell_condition && !position.stop_loss_trigger_time) {
-        await positionModel
-          .updateOne(
-            { _id: new Types.ObjectId(position._id) },
-            { $set: { stop_loss_trigger_time: Date.now() } },
-          )
-          .hint('_id_');
+      if (
+        position.take_profit_trigger_time &&
+        take_profit_time_passed &&
+        +candle.close_price >= position.take_profit
+      ) {
+        return {
+          position,
+          candle,
+          sell_trigger: POSITION_SELL_TRIGGER.TAKE_PROFIT,
+        };
       }
 
-      const time_passed =
+      /**
+       *  =========== END TAKE PROFIT ===========
+       */
+
+      /**
+       *  =========== STOP LOSS ===========
+       */
+
+      // set timer
+      if (
+        +candle.close_price <= position.stop_loss &&
+        !position.stop_loss_trigger_time
+      ) {
+        await positionModel.findByIdAndUpdate(position._id, {
+          $set: { stop_loss_trigger_time: Date.now() },
+        });
+
+        return;
+      }
+
+      const stop_loss_time_passed =
         position.stop_loss_trigger_time &&
-        Date.now() - position.stop_loss_trigger_time >
-          WAIT_SECONDS_BEFORE_SELLING;
+        Date.now() - position.stop_loss_trigger_time > MILLISECONDS.MINUTE;
 
-      if (time_passed && !sell_condition && position.stop_loss_trigger_time) {
-        await positionModel
-          .updateOne(
-            { _id: new Types.ObjectId(position._id) },
-            { $unset: { stop_loss_trigger_time: true } },
-          )
-          .hint('_id_');
+      // remove timer
+      if (
+        position.stop_loss_trigger_time &&
+        stop_loss_time_passed &&
+        +candle.close_price > position.stop_loss
+      ) {
+        await positionModel.findByIdAndUpdate(position._id, {
+          $unset: { stop_loss_trigger_time: true },
+        });
+
+        return;
       }
 
-      if (time_passed && sell_condition && position.stop_loss_trigger_time) {
+      // execute action
+
+      if (
+        position.stop_loss_trigger_time &&
+        stop_loss_time_passed &&
+        +candle.close_price <= position.stop_loss
+      ) {
         return {
           position,
           candle,
@@ -137,13 +171,98 @@ export const applyStrategy = async function applyStrategy(
         };
       }
 
-      if (candle.close_price >= position.take_profit) {
+      /**
+       *  =========== END STOP LOSS ===========
+       */
+
+      /**
+       *  =========== TRAILING STOP LOSS ===========
+       */
+
+      const tsl = getTSL(+candle.close_price, candle.symbol);
+
+      if (
+        +candle.close_price >= position.arm_trailing_stop_loss &&
+        !position.trailing_stop_loss_armed
+      ) {
+        // set trailing stop loss
+        await positionModel.findByIdAndUpdate(position._id, {
+          $set: {
+            trailing_stop_loss_armed: true,
+            trailing_stop_loss: tsl,
+          },
+        });
+
+        return;
+      }
+
+      // set timer
+      if (
+        position.trailing_stop_loss_armed &&
+        +candle.close_price <= position.trailing_stop_loss &&
+        !position.trailing_stop_loss_trigger_time
+      ) {
+        await positionModel.findByIdAndUpdate(position._id, {
+          $set: { trailing_stop_loss_trigger_time: Date.now() },
+        });
+
+        return;
+      }
+
+      const trailing_stop_loss_time_passed =
+        position.trailing_stop_loss_trigger_time &&
+        Date.now() - position.trailing_stop_loss_trigger_time >
+          MILLISECONDS.MINUTE;
+
+      // remove timer
+      if (
+        position.trailing_stop_loss_armed &&
+        position.trailing_stop_loss_trigger_time &&
+        trailing_stop_loss_time_passed &&
+        +candle.close_price > position.trailing_stop_loss
+      ) {
+        await positionModel.findByIdAndUpdate(position._id, {
+          $unset: { trailing_stop_loss_trigger_time: true },
+        });
+
+        return;
+      }
+
+      // execute action
+
+      if (
+        position.trailing_stop_loss_armed &&
+        position.trailing_stop_loss_trigger_time &&
+        trailing_stop_loss_time_passed &&
+        +candle.close_price <= position.trailing_stop_loss
+      ) {
         return {
           position,
           candle,
-          sell_trigger: POSITION_SELL_TRIGGER.TAKE_PROFIT,
+          sell_trigger: POSITION_SELL_TRIGGER.TRAILING_STOP_LOSS,
         };
       }
+
+      // set tsl
+
+      // do not update tsl while its looking to sell
+      if (
+        position.trailing_stop_loss_armed &&
+        !position.trailing_stop_loss_trigger_time &&
+        tsl > position.trailing_stop_loss
+      ) {
+        await positionModel.findByIdAndUpdate(position._id, {
+          $set: { trailing_stop_loss: tsl },
+        });
+      }
+
+      /**
+       *  =========== END TRAILING STOP LOSS ===========
+       */
+
+      return Promise.resolve();
+
+      // =======================================
     }),
   );
 

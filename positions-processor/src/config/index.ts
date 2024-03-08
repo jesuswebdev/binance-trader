@@ -28,7 +28,10 @@ const env = validateObjectSchema(
     MESSAGE_BROKER_USER: joi.string().trim().required(),
     MESSAGE_BROKER_PASSWORD: joi.string().trim().required(),
     WAIT_SECONDS_BEFORE_SELLING: joi.number().integer().positive().required(),
-    POSITION_TAKE_PROFIT: joi.number().integer().positive().required(),
+    POSITION_TAKE_PROFIT: joi.number().positive().required(),
+    POSITION_TRAILING_STOP_LOSS: joi.number().positive().required(),
+    POSITION_ARM_TRAILING_STOP_LOSS: joi.number().positive().required(),
+    POSITION_STOP_LOSS: joi.number().positive().required(),
     HEALTHCHECK_PORT: joi.number().port().default(8080),
   }),
 );
@@ -51,4 +54,11 @@ export const WAIT_SECONDS_BEFORE_SELLING =
   +(env.WAIT_SECONDS_BEFORE_SELLING ?? 0) * MILLISECONDS.SECOND;
 
 export const POSITION_TAKE_PROFIT = +(env.POSITION_TAKE_PROFIT ?? 0);
+export const POSITION_TRAILING_STOP_LOSS = +(
+  env.POSITION_TRAILING_STOP_LOSS ?? 0
+);
+export const POSITION_ARM_TRAILING_STOP_LOSS = +(
+  env.POSITION_ARM_TRAILING_STOP_LOSS ?? 0
+);
+export const POSITION_STOP_LOSS = +(env.POSITION_STOP_LOSS ?? 0);
 export const HEALTHCHECK_PORT = env.HEALTHCHECK_PORT;
