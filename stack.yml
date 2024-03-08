@@ -108,6 +108,25 @@ services:
         uid: '1000'
         gid: '1000'
         mode: 0700
+  positions-processor:
+    deploy:
+      replicas: 1
+      restart_policy:
+        <<: *default-restart-policy
+      update_config:
+        <<: *default-update-config
+    healthcheck:
+      <<: *default-healthcheck
+      test: curl --fail http://localhost:8080 || exit 1
+    image: jesuswebdev/binance-trader/positions-processor:${API_TAG:-c2fc59526e80b9203fc601b8b0bfe810e6260653}
+    environment:
+      - NODE_ENV=production
+    secrets:
+      - source: positions-processor-env-v1
+        target: /usr/app/positions-processor/.env.production
+        uid: '1000'
+        gid: '1000'
+        mode: 0700
 
 secrets:
   markets-observer-env-v1:
@@ -117,4 +136,6 @@ secrets:
   candles-processor-env-v1:
     external: true
   signals-processor-env-v1:
+    external: true
+  positions-processor-env-v1:
     external: true
