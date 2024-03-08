@@ -21,10 +21,7 @@ import {
   createSellOrder,
   createSellOrderForCanceledOrder,
 } from './entity/order/controller';
-
-function logMessage(msg: string) {
-  console.log(`[${new Date().toISOString()}] PID (${process.pid}) - ${msg}`);
-}
+import logger from './utils/logger';
 
 http
   .createServer(function (_, res) {
@@ -33,9 +30,9 @@ http
     res.end();
   })
   .listen(HEALTHCHECK_PORT)
-  .on('error', (error) => console.error(error))
+  .on('error', (error) => logger.error(error))
   .on('listening', async () => {
-    logMessage('Starting Trader');
+    logger.info('Starting Trader');
 
     const binance = getBinanceInstance({
       apiUrl: BINANCE_API_URL,
@@ -52,10 +49,10 @@ http
     const [db] = await Promise.all([initDb(), broker.initializeConnection()]);
 
     const terminate = () => {
-      logMessage('Exiting Trader');
+      logger.info('Exiting Trader');
 
       Promise.all([db.destroy(), broker.close()]).then(() => {
-        logMessage('Trader terminated');
+        logger.info('Trader terminated');
         process.exit();
       });
     };
@@ -63,7 +60,7 @@ http
     process.on('SIGINT', terminate);
     process.on('SIGTERM', terminate);
     process.on('unhandledRejection', (reason) => {
-      console.error(reason);
+      logger.error(reason);
       terminate();
     });
 
@@ -105,14 +102,13 @@ http
     // =========== END DEAD LETTER EXCHANGE ===============
 
     const errorHandler = (error: unknown) => {
-      console.error(error);
+      logger.error(error);
     };
 
     // position created
 
-    const handlePositionCreated = async (msg: LeanPositionDocument) => {
-      await createBuyOrder({ database: db, binance, position: msg });
-    };
+    const handlePositionCreated = (msg: LeanPositionDocument) =>
+      createBuyOrder({ database: db, binance, position: msg });
 
     broker
       .listen(POSITION_EVENTS.POSITION_CREATED, handlePositionCreated, {
@@ -121,9 +117,8 @@ http
       .catch(errorHandler);
 
     // position closed
-    const handlePositionClosed = async (msg: LeanPositionDocument) => {
-      await createSellOrder({ database: db, binance, position: msg });
-    };
+    const handlePositionClosed = (msg: LeanPositionDocument) =>
+      createSellOrder({ database: db, binance, position: msg });
 
     broker
       .listen(POSITION_EVENTS.POSITION_CLOSED, handlePositionClosed, {
@@ -149,5 +144,5 @@ http
       )
       .catch(errorHandler);
 
-    logMessage('Trader started');
+    logger.info('Trader started');
   });
