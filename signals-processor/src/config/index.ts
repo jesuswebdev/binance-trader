@@ -7,9 +7,12 @@ import {
   MILLISECONDS,
 } from '@binance-trader/shared';
 
-if (process.env.NODE_ENV !== ENVIRONMENT_TYPES.PRODUCTION) {
-  dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-}
+dotenv.config({
+  path: path.resolve(
+    __dirname,
+    `../../.env.${process.env.NODE_ENV ?? ENVIRONMENT_TYPES.DEVELOPMENT}`,
+  ),
+});
 
 const env = validateObjectSchema(
   process.env,
