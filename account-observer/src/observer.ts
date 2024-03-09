@@ -16,6 +16,7 @@ import logger from './utils/logger';
 
 export default class AccountObserver {
   private readonly allowed_pairs: Map<string, boolean>;
+  private readonly allowed_assets: Map<string, boolean>;
   private listenKeyKeepAliveInterval: NodeJS.Timer | null;
   private client: ws.WebSocket | undefined;
   private terminating: boolean;
@@ -24,9 +25,13 @@ export default class AccountObserver {
     private readonly binance: AxiosInstance,
   ) {
     this.allowed_pairs = new Map();
+    this.allowed_assets = new Map();
+
+    this.allowed_assets.set('USDT', true);
 
     for (const pair of PAIRS) {
       this.allowed_pairs.set(pair.symbol, true);
+      this.allowed_assets.set(pair.baseAsset, true);
     }
 
     this.listenKeyKeepAliveInterval = null;
@@ -69,12 +74,12 @@ export default class AccountObserver {
   async getAccountBalance() {
     const { data: account } = await this.binance.get('/api/v3/account');
 
-    return (account.balances as { asset: string; free: string }[]).map(
-      (balance) => ({
+    return (account.balances as { asset: string; free: string }[])
+      .map((balance) => ({
         asset: balance.asset,
         free: nz(+(balance?.free ?? 0)),
-      }),
-    );
+      }))
+      .filter((balance) => !!this.allowed_assets.get(balance.asset));
   }
 
   async updateBalance() {
