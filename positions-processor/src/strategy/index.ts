@@ -62,6 +62,11 @@ export const applyStrategy = async function applyStrategy(
       stop_loss: true,
       stop_loss_trigger_time: true,
       take_profit: true,
+      take_profit_trigger_time: true,
+      arm_trailing_stop_loss: true,
+      trailing_stop_loss_armed: true,
+      trailing_stop_loss: true,
+      trailing_stop_loss_trigger_time: true,
       buy_price: true,
     })
     .hint('symbol_1_status_1')
