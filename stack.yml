@@ -21,6 +21,10 @@ services:
   rabbitmq:
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 300M
       restart_policy:
         <<: *default-restart-policy
       update_config:
@@ -35,6 +39,10 @@ services:
   redis:
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 50M
       restart_policy:
         <<: *default-restart-policy
       update_config:
@@ -46,6 +54,10 @@ services:
   account-observer:
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 150M
       restart_policy:
         <<: *default-restart-policy
       update_config:
@@ -53,7 +65,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader/account-observer:${API_TAG:-c2fc59526e80b9203fc601b8b0bfe810e6260653}
+    image: jesuswebdev/binance-trader-account-observer:e8f74f6d38d3f89d903a8c1dce459f020637f304
     environment:
       - NODE_ENV=production
     secrets:
@@ -65,6 +77,10 @@ services:
   markets-observer:
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 100M
       restart_policy:
         <<: *default-restart-policy
       update_config:
@@ -72,7 +88,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader/markets-observer:${API_TAG:-c2fc59526e80b9203fc601b8b0bfe810e6260653}
+    image: jesuswebdev/binance-trader-markets-observer:e8f74f6d38d3f89d903a8c1dce459f020637f304
     environment:
       - NODE_ENV=production
     secrets:
@@ -81,9 +97,16 @@ services:
         uid: '1000'
         gid: '1000'
         mode: 0700
+    depends_on:
+      - candles-processor
+      - rabbitmq
   candles-processor:
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 150M
       restart_policy:
         <<: *default-restart-policy
       update_config:
@@ -91,7 +114,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader/candles-processor:${API_TAG:-c2fc59526e80b9203fc601b8b0bfe810e6260653}
+    image: jesuswebdev/binance-trader-candles-processor:bfa50213ddf61845404e1c9ebea19dcc55cb1bb4
     environment:
       - NODE_ENV=production
     secrets:
@@ -100,9 +123,18 @@ services:
         uid: '1000'
         gid: '1000'
         mode: 0700
+    depends_on:
+      - signals-processor
+      - positions-processor
+      - rabbitmq
+      - redis
   signals-processor:
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.15'
+          memory: 150M
       restart_policy:
         <<: *default-restart-policy
       update_config:
@@ -110,7 +142,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader/signals-processor:${API_TAG:-c2fc59526e80b9203fc601b8b0bfe810e6260653}
+    image: jesuswebdev/binance-trader-signals-processor:e8f74f6d38d3f89d903a8c1dce459f020637f304
     environment:
       - NODE_ENV=production
     secrets:
@@ -119,9 +151,17 @@ services:
         uid: '1000'
         gid: '1000'
         mode: 0700
+    depends_on:
+      - positions-processor
+      - rabbitmq
+      - redis
   positions-processor:
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.15'
+          memory: 150M
       restart_policy:
         <<: *default-restart-policy
       update_config:
@@ -129,7 +169,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader/positions-processor:${API_TAG:-c2fc59526e80b9203fc601b8b0bfe810e6260653}
+    image: jesuswebdev/binance-trader-positions-processor:e8f74f6d38d3f89d903a8c1dce459f020637f304
     environment:
       - NODE_ENV=production
     secrets:
@@ -138,9 +178,16 @@ services:
         uid: '1000'
         gid: '1000'
         mode: 0700
+    depends_on:
+      - trader
+      - rabbitmq
   trader:
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.15'
+          memory: 150M
       restart_policy:
         <<: *default-restart-policy
       update_config:
@@ -148,7 +195,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader/trader:${API_TAG:-c2fc59526e80b9203fc601b8b0bfe810e6260653}
+    image: jesuswebdev/binance-trader-trader:e8f74f6d38d3f89d903a8c1dce459f020637f304
     environment:
       - NODE_ENV=production
     secrets:
@@ -157,6 +204,9 @@ services:
         uid: '1000'
         gid: '1000'
         mode: 0700
+    depends_on:
+      - account-observer
+      - rabbitmq
 
 secrets:
   markets-observer-env-v1:
