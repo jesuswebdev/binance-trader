@@ -95,7 +95,7 @@ export const processCandleTick = async function processCandleTick({
       .hint('symbol_1')
       .lean();
 
-    if (!market.enabled) {
+    if (!market?.enabled) {
       await redis.del(redisKeys.candlesPersistLock);
 
       return;
