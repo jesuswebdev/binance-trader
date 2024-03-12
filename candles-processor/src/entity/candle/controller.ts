@@ -312,7 +312,6 @@ export const fillCandlesData = async function fillCandlesData({
   for (const pair of PAIRS) {
     const symbol = pair.symbol;
     const interval = CANDLE_INTERVAL;
-    logger.info(`Filling candles data for pair: ${symbol}`);
 
     const count = await candleModel
       .countDocuments({
@@ -325,44 +324,59 @@ export const fillCandlesData = async function fillCandlesData({
       .hint('symbol_1_open_time_1');
 
     if (count < 150) {
+      logger.info(`Filling candles data for pair: ${symbol}`);
+
       const query = new URLSearchParams({
         symbol,
         interval,
         startTime: (Date.now() - getTimeDiff(155, interval)).toString(),
       }).toString();
 
-      const { data } = await binance.get<[number[]]>(`/api/v3/klines?${query}`);
+      try {
+        const { data, status } = await binance.get<[number[]]>(
+          `/api/v3/klines?${query}`,
+        );
 
-      if (Array.isArray(data) && data.length > 0) {
-        const processed = buildCandles({
-          candles: data,
-          symbol,
-          interval,
-        });
-
-        await candleModel.deleteMany({ $and: [{ symbol }, { interval }] });
-        await candleModel.insertMany(processed);
-
-        const marketExists = await marketModel.exists({ symbol });
-
-        if (!marketExists) {
-          await marketModel.create({
+        if (status === 200 && Array.isArray(data) && data.length > 0) {
+          const processed = buildCandles({
+            candles: data,
             symbol,
-            last_price: processed[processed.length - 1].close_price,
-            quote_asset: pair.quoteAsset,
-            base_asset: pair.baseAsset,
-            price_tick_size: pair.priceTickSize,
-            step_size: pair.stepSize,
-            enabled: true,
+            interval,
+          });
+
+          await candleModel.deleteMany({ $and: [{ symbol }, { interval }] });
+          await candleModel.insertMany(processed);
+
+          const marketExists = await marketModel.exists({ symbol });
+
+          if (!marketExists) {
+            logger.info(
+              `Market for symbol '${symbol}' does not exist. Creating...`,
+            );
+
+            await marketModel.create({
+              symbol,
+              last_price: processed[processed.length - 1].close_price,
+              quote_asset: pair.quoteAsset,
+              base_asset: pair.baseAsset,
+              price_tick_size: pair.priceTickSize,
+              step_size: pair.stepSize,
+              enabled: true,
+            });
+          }
+
+          logger.info(`Processing candles for symbol: ${symbol}`);
+
+          await processCandles({
+            redis,
+            binance,
+            database,
+            candles: processed.slice(-5),
           });
         }
-
-        await processCandles({
-          redis,
-          binance,
-          database,
-          candles: processed.slice(-5),
-        });
+      } catch (error) {
+        logger.error(error);
+        continue;
       }
     }
 
