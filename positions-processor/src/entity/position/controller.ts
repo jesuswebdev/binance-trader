@@ -15,6 +15,7 @@ import {
 import { Connection, Types } from 'mongoose';
 import {
   POSITION_ARM_TRAILING_STOP_LOSS,
+  POSITION_STOP_LOSS,
   POSITION_TAKE_PROFIT,
 } from '../../config';
 import { applyStrategy } from '../../strategy';
@@ -95,8 +96,17 @@ export const createPosition = async function createPosition({
   const candle = signal.close_candle as CandleAttributes;
 
   const price = signal.price;
-  const stop_loss =
+  let stop_loss =
     +candle.atr_stop < price ? +candle.atr_stop : price - +candle.atr * 3;
+
+  const fixedStopLoss = toSymbolPrecision(
+    price * (1 - POSITION_STOP_LOSS / 100),
+    signal.symbol,
+  );
+
+  if (stop_loss < fixedStopLoss) {
+    stop_loss = fixedStopLoss;
+  }
 
   const createdPosition: PositionDocument = await positionModel.create({
     id: `${candle.symbol}_${candle.interval}_${candle.event_time}`,
