@@ -156,6 +156,8 @@ class Observer {
 
     process.on('SIGINT', this.terminate.bind(this));
     process.on('SIGTERM', this.terminate.bind(this));
+    process.on('unhandledRejection', this.terminate.bind(this));
+    process.on('uncaughtException', this.terminate.bind(this));
 
     logger.info('Markets Observer started');
   }

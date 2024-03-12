@@ -50,6 +50,10 @@ http
       logger.error(reason);
       terminate();
     });
+    process.on('uncaughtException', (error) => {
+      logger.error(error);
+      terminate();
+    });
 
     const candleProcessedHandler = async (data: CandleTickData) => {
       await processOpenPositions({ database: db, candle: data, broker });

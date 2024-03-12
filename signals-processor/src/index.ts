@@ -51,6 +51,10 @@ http
       logger.error(reason);
       terminate();
     });
+    process.on('uncaughtException', (error) => {
+      logger.error(error);
+      terminate();
+    });
 
     const msgHandler = async (msg: CandleTickData) => {
       await processSignals({ broker, redis, database: db, candle: msg });

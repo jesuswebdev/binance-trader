@@ -68,6 +68,10 @@ http
       logger.error(reason);
       terminate();
     });
+    process.on('uncaughtException', (error) => {
+      logger.error(error);
+      terminate();
+    });
 
     const msgHandler = async (data: CandleTickData) => {
       const candles = await processCandleTick({

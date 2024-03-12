@@ -65,6 +65,10 @@ http
       logger.error(reason);
       terminate();
     });
+    process.on('uncaughtException', (error) => {
+      logger.error(error);
+      terminate();
+    });
 
     // =========== DEAD LETTER EXCHANGE ===============
 
