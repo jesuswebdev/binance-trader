@@ -171,18 +171,15 @@ export async function processCandles({
 
   const candleModel: CandleModel = database.model(DATABASE_MODELS.CANDLE);
   const symbol = candles[0].symbol;
-  const candlesToUpdate = candles;
 
   const toUpdate: LeanCandleDocument[] = await candleModel
-    .find({ id: { $in: candlesToUpdate.map(({ id }) => id) } })
+    .find({ id: { $in: candles.map((candle) => candle.id) } })
     .hint('id_1')
     .sort({ open_time: 1 })
     .lean();
 
-  const updates: Record<
-    string,
-    string | number | boolean | null | undefined
-  >[] = [];
+  let updates: Record<string, string | number | boolean | null | undefined>[] =
+    [];
 
   const ignoredFields = {
     updatedAt: false,
@@ -263,10 +260,16 @@ export async function processCandles({
     cachedCandles.push(...candles);
 
     if (cachedCandles.length >= 150) {
-      const ohlc = getOHLCValues(cachedCandles);
-      const indicators = await getIndicatorsValues(ohlc, cachedCandles);
+      const indicators = getIndicatorsValues(
+        getOHLCValues(cachedCandles),
+        cachedCandles,
+      );
+
       updates.push({ id: candle.id, ...indicators });
     }
+
+    // gc
+    cachedCandles = null;
   }
 
   if (updates.length > 0) {
@@ -282,6 +285,8 @@ export async function processCandles({
       { ordered: false },
     );
   }
+  // gc
+  updates = null;
 }
 
 export async function fillCandlesData({
@@ -338,7 +343,7 @@ export async function fillCandlesData({
         );
 
         if (status === 200 && Array.isArray(data) && data.length > 0) {
-          const processed = buildCandles({
+          let processed = buildCandles({
             candles: data,
             symbol,
             interval,
@@ -373,6 +378,9 @@ export async function fillCandlesData({
             database,
             candles: processed.slice(-5),
           });
+
+          // attempt to help gc
+          processed = null;
         }
       } catch (error) {
         logger.error(error);
