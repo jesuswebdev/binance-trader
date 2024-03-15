@@ -1,44 +1,39 @@
 import { LeanCandleDocument, nz } from '@binance-trader/shared';
 import { OHLC } from '../interfaces';
-import { getEMA, getTR, getRMA } from './index';
+import {
+  calculateTrueRange,
+  calculateRollingMovingAverage,
+  calculateExponentialMovingAverage,
+} from './index';
 
-interface getCHATRFunction {
-  (
-    candles: LeanCandleDocument[],
-    ohlc: OHLC,
-  ): Promise<
-    | {
-        ch_atr: number;
-        ch_atr_ema: number;
-      }
-    | undefined
-  >;
-}
-
-export const getCHATR: getCHATRFunction = async function getCHATR(
-  candles,
-  ohlc,
-) {
+export function getCHATR(
+  candles: LeanCandleDocument[],
+  ohlc: OHLC,
+): {
+  ch_atr: number;
+  ch_atr_ema: number;
+} {
   if (candles.length === 1) {
     return;
   }
 
-  const { high, low, close } = ohlc;
-
-  const { tr } = (await getTR([high, low, close], {
+  const { tr } = calculateTrueRange([ohlc.high, ohlc.low, ohlc.close], {
     all: true,
     parseFn: nz,
-  })) as Record<string, number[]>;
+  }) as Record<string, number[]>;
 
-  const { rma } = await getRMA(tr, { periods: 10, parseFn: nz });
-  const atrp = rma.map((range, i) => (range / close[i]) * 100);
-  const { ema: avg } = (await getEMA([atrp], {
+  const { rma } = calculateRollingMovingAverage(tr, {
+    periods: 10,
+    parseFn: nz,
+  });
+  const atrp = rma.map((range, i) => (range / ohlc.close[i]) * 100);
+  const { ema: avg } = calculateExponentialMovingAverage(atrp, {
     periods: 28,
     parseFn: nz,
-  })) as Record<string, number>;
+  }) as Record<string, number>;
 
   return {
     ch_atr_ema: avg,
     ch_atr: atrp[atrp.length - 1],
   };
-};
+}

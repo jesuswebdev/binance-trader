@@ -1,6 +1,22 @@
 import { nz } from '@binance-trader/shared';
 
-export const getMESA = function getMESA(hl2: number[]) {
+function fillWithZeros(object: Record<string, number[]>) {
+  for (const key in object) {
+    object[key].unshift(0);
+  }
+}
+
+function compute(array: number[], period: number) {
+  return (
+    (0.0962 * array[0] +
+      0.5769 * nz(array[2]) -
+      0.5769 * nz(array[4]) -
+      0.0962 * nz(array[6])) *
+    (0.075 * nz(period) + 0.54)
+  );
+}
+
+export function getMESA(hl2: number[]) {
   const fl = 0.5;
   const sl = 0.05;
 
@@ -26,19 +42,6 @@ export const getMESA = function getMESA(hl2: number[]) {
     mama: [],
     fama: [],
   };
-
-  const fillWithZeros = (object: Record<string, number[]>) => {
-    for (const key in object) {
-      object[key].unshift(0);
-    }
-  };
-
-  const compute = (array: number[], period: number) =>
-    (0.0962 * array[0] +
-      0.5769 * nz(array[2]) -
-      0.5769 * nz(array[4]) -
-      0.0962 * nz(array[6])) *
-    (0.075 * nz(period) + 0.54);
 
   hl2.forEach((current, index, array) => {
     if (index < 5) {
@@ -175,4 +178,4 @@ export const getMESA = function getMESA(hl2: number[]) {
     mama: nz(vars.mama[0]),
     fama: nz(vars.fama[0]),
   };
-};
+}

@@ -1,12 +1,8 @@
 import { OHLC } from '../interfaces';
 
-interface getVolumeTrendFunction {
-  (data: OHLC): { volume_trend: 1 | -1 };
-}
+type GetVolumeTrendFunctionReturnValue = { volume_trend: 1 | -1 };
 
-export const getVolumeTrend: getVolumeTrendFunction = function getVolumeTrend(
-  ohlc,
-) {
+export function getVolumeTrend(ohlc: OHLC): GetVolumeTrendFunctionReturnValue {
   const { open, close, volume } = ohlc;
   const lookback = 14;
 
@@ -18,4 +14,4 @@ export const getVolumeTrend: getVolumeTrendFunction = function getVolumeTrend(
   }
 
   return { volume_trend: up - down > 0 ? 1 : -1 };
-};
+}

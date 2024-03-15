@@ -30,7 +30,7 @@ http
   })
   .listen(HEALTHCHECK_PORT)
   .on('error', (error) => logger.error(error))
-  .on('listening', async () => {
+  .on('listening', async function () {
     logger.info('Starting Candles Processor');
 
     const binance = getBinanceInstance({
@@ -51,7 +51,7 @@ http
       broker.initializeConnection(),
     ]);
 
-    const terminate = () => {
+    function terminate() {
       logger.info('Exiting Candles Processor');
 
       Promise.all([db.destroy(), redis.disconnect(), broker.close()]).then(
@@ -60,20 +60,20 @@ http
           process.exit(1);
         },
       );
-    };
+    }
 
     process.on('SIGINT', terminate);
     process.on('SIGTERM', terminate);
-    process.on('unhandledRejection', (reason) => {
+    process.on('unhandledRejection', function (reason) {
       logger.error(reason);
       terminate();
     });
-    process.on('uncaughtException', (error) => {
+    process.on('uncaughtException', function (error) {
       logger.error(error);
       terminate();
     });
 
-    const msgHandler = async (data: CandleTickData) => {
+    async function msgHandler(data: CandleTickData) {
       const candles = await processCandleTick({
         binance,
         database: db,
@@ -86,7 +86,7 @@ http
 
         broker.publish(CANDLE_EVENTS.CANDLE_PROCESSED, data);
       }
-    };
+    }
 
     broker
       .listen(CANDLE_EVENTS.CANDLE_TICK, msgHandler)

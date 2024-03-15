@@ -1,30 +1,16 @@
-import tulind from 'tulind';
-import { genericCallback } from '.';
+import { nz } from '@binance-trader/shared';
 
-interface getSMAFunction {
-  (
-    data: [number[]],
-    options: {
-      periods?: number;
-      parseFn: (v: number) => number | null;
-    },
-  ): Promise<{ sma: number | null }>;
-}
+type GetSMAFunctionReturnValue = { sma: number | null };
 
-export const getSMA: getSMAFunction = function getSMA(
-  data,
+export function calculateSimpleMovingAverage(
+  data: number[],
   { periods = 28, parseFn },
-) {
-  return new Promise((resolve, reject) => {
-    tulind.indicators.sma.indicator(
-      data,
-      [periods],
-      genericCallback.bind(null, {
-        resolve,
-        reject,
-        parseFn,
-        properties: ['sma'],
-      }),
-    );
-  });
-};
+): GetSMAFunctionReturnValue {
+  let sum = 0;
+
+  for (const item of data.slice(-periods)) {
+    sum += nz(item);
+  }
+
+  return { sma: parseFn(sum / periods) };
+}

@@ -1,25 +1,22 @@
 import { nz } from '@binance-trader/shared';
-import { getSMA } from '.';
+import { calculateSimpleMovingAverage } from '.';
 
-interface getRMAFunction {
-  (
-    data: number[],
-    options: {
-      periods: number;
-      parseFn: (v: number) => number | null;
-    },
-  ): Promise<{ rma: number[] }>;
-}
+type GetRMAOptions = {
+  periods: number;
+  parseFn: (v: number) => number | null;
+};
+
+type GetRMAFunctionReturnValue = { rma: number[] };
 
 /**
  *
  * @summary Rolling Moving Average
  */
 
-export const getRMA: getRMAFunction = async function getRMA(
-  data,
-  { periods, parseFn },
-) {
+export function calculateRollingMovingAverage(
+  data: number[],
+  { periods, parseFn }: GetRMAOptions,
+): GetRMAFunctionReturnValue {
   const alpha = 1 / periods;
 
   const sum: number[] = [];
@@ -31,7 +28,7 @@ export const getRMA: getRMAFunction = async function getRMA(
     let value: number;
 
     if (nan) {
-      const { sma } = await getSMA([src], { periods, parseFn });
+      const { sma } = calculateSimpleMovingAverage(src, { periods, parseFn });
       value = sma as number;
     } else {
       value = parseFn(alpha * item + (1 - alpha) * nz(previous)) as number;
@@ -40,4 +37,4 @@ export const getRMA: getRMAFunction = async function getRMA(
   }
 
   return { rma: sum };
-};
+}

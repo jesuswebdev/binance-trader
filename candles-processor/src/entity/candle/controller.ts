@@ -56,7 +56,7 @@ interface RedisError {
  * If the candles need to be processed, it will take all the candles stored in redis, filter out the latest values, save to mongodb, and return them,
  * otherwise it stores the candle data in redis.
  */
-export const processCandleTick = async function processCandleTick({
+export async function processCandleTick({
   redis,
   database,
   candle,
@@ -155,12 +155,12 @@ export const processCandleTick = async function processCandleTick({
       throw error;
     }
   }
-};
+}
 
 /**
  * @description Calculates indicators values of given candles and saves to database.
  */
-export const processCandles = async function processCandles({
+export async function processCandles({
   candles,
   redis,
   database,
@@ -260,11 +260,11 @@ export const processCandles = async function processCandles({
       .sort({ open_time: 1 })
       .lean();
 
-    const allCandles = cachedCandles.concat(candles);
+    cachedCandles.push(...candles);
 
-    if (allCandles.length >= 150) {
-      const ohlc = getOHLCValues(allCandles);
-      const indicators = await getIndicatorsValues(ohlc, allCandles);
+    if (cachedCandles.length >= 150) {
+      const ohlc = getOHLCValues(cachedCandles);
+      const indicators = await getIndicatorsValues(ohlc, cachedCandles);
       updates.push({ id: candle.id, ...indicators });
     }
   }
@@ -282,9 +282,9 @@ export const processCandles = async function processCandles({
       { ordered: false },
     );
   }
-};
+}
 
-export const fillCandlesData = async function fillCandlesData({
+export async function fillCandlesData({
   database,
   redis,
   binance,
@@ -387,4 +387,4 @@ export const fillCandlesData = async function fillCandlesData({
   await redis.del(lockKey);
 
   logger.info('Finished filling candles data');
-};
+}

@@ -6,7 +6,7 @@ import logger from '../utils/logger';
 
 export const initDb = async () => {
   const connection = await mongoose
-    .createConnection(DATABASE_URI, { authSource: 'admin' })
+    .createConnection(DATABASE_URI, { authSource: 'admin', maxPoolSize: 3 })
     .asPromise();
 
   createMarketModel(connection);
