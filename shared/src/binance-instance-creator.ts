@@ -7,6 +7,20 @@ type GetBinanceInstanceProps = {
   apiSecret: string;
 };
 
+const secureEndpoints = [
+  '/api/v3/order',
+  '/api/v3/allOrders',
+  '/api/v3/account',
+  '/sapi/v1/asset/dust',
+  '/sapi/v1/capital/withdraw/apply',
+  '/sapi/v1/capital/withdraw/history',
+  '/sapi/v1/asset/assetDetail',
+] as const;
+
+function getSignature(query: string, apiSecret: string) {
+  return crypto.createHmac('sha256', apiSecret).update(query).digest('hex');
+}
+
 const getBinanceInstance = ({
   apiUrl,
   apiKey,
@@ -29,20 +43,6 @@ const getBinanceInstance = ({
     headers: { 'X-MBX-APIKEY': apiKey },
   });
 
-  const getSignature = (query: string) => {
-    return crypto.createHmac('sha256', apiSecret).update(query).digest('hex');
-  };
-
-  const secureEndpoints = [
-    '/api/v3/order',
-    '/api/v3/allOrders',
-    '/api/v3/account',
-    '/sapi/v1/asset/dust',
-    '/sapi/v1/capital/withdraw/apply',
-    '/sapi/v1/capital/withdraw/history',
-    '/sapi/v1/asset/assetDetail',
-  ];
-
   binance.interceptors.request.use(
     (config) => {
       const [base, query] = (config.url ?? '').split('?');
@@ -52,10 +52,8 @@ const getBinanceInstance = ({
       );
 
       if (requiresSignature) {
-        const newQuery = `timestamp=${timestamp}&recvWindow=15000`.concat(
-          query ? `&${query}` : '',
-        );
-        config.url = `${base}?${newQuery}&signature=${getSignature(newQuery)}`;
+        const newQuery = `timestamp=${timestamp}&recvWindow=15000${query ? `&${query}` : ''}`;
+        config.url = `${base}?${newQuery}&signature=${getSignature(newQuery, apiSecret)}`;
       }
 
       return config;
