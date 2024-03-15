@@ -9,9 +9,7 @@ const assetSubsSchema = new mongoose.Schema(
   { _id: false },
 );
 
-export const createAccountSchema = function createAccountSchema(
-  options: SchemaOptions = {},
-) {
+export function createAccountSchema(options: SchemaOptions = {}) {
   const schema = new mongoose.Schema<AccountAttributes>(
     {
       id: { type: String },
@@ -30,4 +28,4 @@ export const createAccountSchema = function createAccountSchema(
   schema.index({ id: 1 }, { unique: true });
 
   return schema;
-};
+}

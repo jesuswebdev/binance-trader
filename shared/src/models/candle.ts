@@ -3,9 +3,7 @@ import { numberSchemaValidation, getTimeDiff } from '../index';
 import { CandleAttributes } from '../interfaces/candle';
 import { PAIRS } from '../';
 
-export const createCandleSchema = function createCandleSchema(
-  options: SchemaOptions = {},
-) {
+export function createCandleSchema(options: SchemaOptions = {}) {
   const schema = new mongoose.Schema<CandleAttributes>(
     {
       id: { type: String, required: true, index: true },
@@ -111,4 +109,4 @@ export const createCandleSchema = function createCandleSchema(
   );
 
   return schema;
-};
+}

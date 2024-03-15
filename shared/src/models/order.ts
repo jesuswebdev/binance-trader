@@ -1,9 +1,7 @@
 import mongoose, { SchemaOptions } from 'mongoose';
 import { OrderAttributes } from '../interfaces/order';
 
-export const createOrderSchema = function createOrderSchema(
-  options: SchemaOptions = {},
-) {
+export function createOrderSchema(options: SchemaOptions = {}) {
   const schema = new mongoose.Schema<OrderAttributes>(
     {
       symbol: { type: String },
@@ -36,4 +34,4 @@ export const createOrderSchema = function createOrderSchema(
   schema.index({ clientOrderId: 1 });
 
   return schema;
-};
+}

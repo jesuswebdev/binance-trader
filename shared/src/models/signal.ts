@@ -3,9 +3,7 @@ import { DATABASE_MODELS, POSITION_STATUS, SIGNAL_TYPES } from '../constants';
 import { numberSchemaValidation } from '../index';
 import { SignalAttributes } from '../interfaces/signal';
 
-export const createSignalSchema = function createSignalSchema(
-  options: SchemaOptions = {},
-) {
+export function createSignalSchema(options: SchemaOptions = {}) {
   const schema = new Schema<SignalAttributes>(
     {
       id: { type: String, required: true },
@@ -54,4 +52,4 @@ export const createSignalSchema = function createSignalSchema(
   schema.index({ id: 1 }, { unique: true });
 
   return schema;
-};
+}

@@ -3,9 +3,7 @@ import { numberSchemaValidation } from '../index';
 import { MarketAttributes } from '../interfaces';
 import { PAIRS } from '../';
 
-export const createMarketSchema = function createMarketSchema(
-  options: SchemaOptions = {},
-) {
+export function createMarketSchema(options: SchemaOptions = {}) {
   const schema = new mongoose.Schema<MarketAttributes>(
     {
       symbol: {
@@ -34,4 +32,4 @@ export const createMarketSchema = function createMarketSchema(
   schema.index({ trader_lock: 1, last_trader_lock_update: 1 });
 
   return schema;
-};
+}

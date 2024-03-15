@@ -7,9 +7,7 @@ import {
 import { numberSchemaValidation } from '../index';
 import { PositionAttributes } from '../interfaces/position';
 
-export const createPositionSchema = function createPositionSchema(
-  options: SchemaOptions = {},
-) {
+export function createPositionSchema(options: SchemaOptions = {}) {
   const schema = new Schema<PositionAttributes>(
     {
       id: { type: String, required: true, unique: true },
@@ -80,4 +78,4 @@ export const createPositionSchema = function createPositionSchema(
   schema.index({ id: 1, 'buy_order.orderId': 1 });
 
   return schema;
-};
+}
