@@ -65,7 +65,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-account-observer:0f4d134eb6393c30896a9416bc8f945a0370491f
+    image: jesuswebdev/binance-trader-account-observer:7e834e8a00e1fbc2ede8c1e727ac9dceae220518
     environment:
       - NODE_ENV=production
     secrets:
@@ -88,7 +88,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-markets-observer:0f4d134eb6393c30896a9416bc8f945a0370491f
+    image: jesuswebdev/binance-trader-markets-observer:7e834e8a00e1fbc2ede8c1e727ac9dceae220518
     environment:
       - NODE_ENV=production
     secrets:
@@ -106,7 +106,7 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 150M
+          memory: 500M
       restart_policy:
         <<: *default-restart-policy
       update_config:
@@ -114,7 +114,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-candles-processor:0f4d134eb6393c30896a9416bc8f945a0370491f
+    image: jesuswebdev/binance-trader-candles-processor:7e834e8a00e1fbc2ede8c1e727ac9dceae220518
     environment:
       - NODE_ENV=production
     secrets:
@@ -142,7 +142,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-signals-processor:0f4d134eb6393c30896a9416bc8f945a0370491f
+    image: jesuswebdev/binance-trader-signals-processor:7e834e8a00e1fbc2ede8c1e727ac9dceae220518
     environment:
       - NODE_ENV=production
     secrets:
@@ -169,11 +169,11 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-positions-processor:183702854fc5f3d41d0e7feee5e2704bb3ad004c
+    image: jesuswebdev/binance-trader-positions-processor:7e834e8a00e1fbc2ede8c1e727ac9dceae220518
     environment:
       - NODE_ENV=production
     secrets:
-      - source: positions-processor-env-v1
+      - source: positions-processor-env-v2
         target: /usr/app/positions-processor/.env.production
         uid: '1000'
         gid: '1000'
@@ -195,7 +195,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-trader:0f4d134eb6393c30896a9416bc8f945a0370491f
+    image: jesuswebdev/binance-trader-trader:7e834e8a00e1fbc2ede8c1e727ac9dceae220518
     environment:
       - NODE_ENV=production
     secrets:
@@ -217,7 +217,7 @@ secrets:
     external: true
   signals-processor-env-v1:
     external: true
-  positions-processor-env-v1:
+  positions-processor-env-v2:
     external: true
   trader-env-v1:
     external: true
