@@ -38,8 +38,8 @@ export function calculateAverageTrueRange(
   // calculate previous day ATR
   calculatedATR.push(sumTR * (1 / periods));
 
-  for (let i = 0; i < periods; i++) {
-    const sliceIndex = data[0].length - 1 - (periods - i);
+  for (let i = periods; i < data[0].length - 1; i++) {
+    const sliceIndex = i;
 
     const { tr: currentTR } = calculateTrueRange(
       [
