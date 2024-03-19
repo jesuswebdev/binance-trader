@@ -33,10 +33,6 @@ export const applyStrategy = function applyStrategy(
     return;
   }
 
-  // const macd =
-  //   currentCandle.macd > currentCandle.macd_signal &&
-  //   (currentCandle.macd > 0 || currentCandle.macd_histogram > 0);
-
   const di =
     currentCandle.adx > 20 &&
     currentCandle.plus_di > 25 &&
@@ -61,15 +57,19 @@ export const applyStrategy = function applyStrategy(
     upward_slope &&
     green_candles;
 
-  const notPump = !(currentCandle.is_pump || previousCandle.is_pump);
+  // more than 5% in the last hour
+  const highestHigh = Math.max(
+    ...candles.slice(-4).map((candle) => candle.high_price),
+    -Infinity,
+  );
+  const lowestLow = Math.min(
+    ...candles.slice(-4).map((candle) => candle.low_price),
+    Infinity,
+  );
 
-  const triggerSignal =
-    volume &&
-    volatile &&
-    trending &&
-    di &&
-    //  && macd
-    notPump;
+  const notARecentPump = 100 - (lowestLow * 100) / highestHigh < 5;
+
+  const triggerSignal = volume && volatile && trending && di && notARecentPump;
 
   if (!triggerSignal) {
     return;
