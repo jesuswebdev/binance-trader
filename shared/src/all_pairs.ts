@@ -86,13 +86,6 @@ export const ALL_PAIRS: Pair[] = [
     stepSize: 0.1,
   },
   {
-    symbol: 'ZECUSDT',
-    quoteAsset: 'USDT',
-    baseAsset: 'ZEC',
-    priceTickSize: 0.01,
-    stepSize: 0.001,
-  },
-  {
     symbol: 'DASHUSDT',
     quoteAsset: 'USDT',
     baseAsset: 'DASH',
@@ -317,13 +310,6 @@ export const ALL_PAIRS: Pair[] = [
     stepSize: 0.01,
   },
   {
-    symbol: 'PEPEUSDT',
-    quoteAsset: 'USDT',
-    baseAsset: 'PEPE',
-    priceTickSize: 1e-8,
-    stepSize: 1,
-  },
-  {
     symbol: 'ARUSDT',
     quoteAsset: 'USDT',
     baseAsset: 'AR',
@@ -349,13 +335,6 @@ export const ALL_PAIRS: Pair[] = [
     quoteAsset: 'USDT',
     baseAsset: 'FET',
     priceTickSize: 0.0001,
-    stepSize: 1,
-  },
-  {
-    symbol: 'FLOKIUSDT',
-    quoteAsset: 'USDT',
-    baseAsset: 'FLOKI',
-    priceTickSize: 1e-8,
     stepSize: 1,
   },
   {
@@ -455,20 +434,6 @@ export const ALL_PAIRS: Pair[] = [
     baseAsset: 'OCEAN',
     priceTickSize: 0.0001,
     stepSize: 1,
-  },
-  {
-    symbol: 'BATUSDT',
-    quoteAsset: 'USDT',
-    baseAsset: 'BAT',
-    priceTickSize: 0.0001,
-    stepSize: 1,
-  },
-  {
-    symbol: 'WAVESUSDT',
-    quoteAsset: 'USDT',
-    baseAsset: 'WAVES',
-    priceTickSize: 0.001,
-    stepSize: 0.01,
   },
   {
     symbol: 'HOTUSDT',
