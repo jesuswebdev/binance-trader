@@ -14,7 +14,6 @@ import {
   getEMASlope,
   getMACD,
   getMESA,
-  getPumpOrDump,
   getSupertrend,
   getVolumeTrend,
   getHeikenAshi,
@@ -134,7 +133,6 @@ export function getIndicatorsValues(ohlc: OHLC, candles: LeanCandleDocument[]) {
     ...getMACD(),
     ...getEMASlope(ohlc, { parseFn }),
     ...getCHATR(candles, ohlc),
-    ...getPumpOrDump(ohlc, { parseFn }),
     /* eslint-disable */
     ...(!previous_candle.trend && !current_candle.trend
       ? getCumulativeIndicator({
