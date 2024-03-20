@@ -199,7 +199,7 @@ services:
     environment:
       - NODE_ENV=production
     secrets:
-      - source: trader-env-v1
+      - source: trader-env-v2
         target: /usr/app/trader/.env.production
         uid: '1000'
         gid: '1000'
@@ -219,5 +219,5 @@ secrets:
     external: true
   positions-processor-env-v2:
     external: true
-  trader-env-v1:
+  trader-env-v2:
     external: true
