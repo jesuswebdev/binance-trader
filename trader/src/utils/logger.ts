@@ -5,4 +5,5 @@ export default pino({
     level: (label) => ({ level: label.toUpperCase() }),
   },
   timestamp: pino.stdTimeFunctions.isoTime,
+  redact: ['X-MBX-APIKEY'],
 });
