@@ -65,7 +65,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-account-observer:11291bd9ede2e2ccacd2aa42a363dc38c8902a2b
+    image: jesuswebdev/binance-trader-account-observer:d58a0ae0243ccf429d0fe5be39e63da91f04eb20
     environment:
       - NODE_ENV=production
     secrets:
@@ -88,7 +88,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-markets-observer:11291bd9ede2e2ccacd2aa42a363dc38c8902a2b
+    image: jesuswebdev/binance-trader-markets-observer:d58a0ae0243ccf429d0fe5be39e63da91f04eb20
     environment:
       - NODE_ENV=production
     secrets:
@@ -114,7 +114,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-candles-processor:11291bd9ede2e2ccacd2aa42a363dc38c8902a2b
+    image: jesuswebdev/binance-trader-candles-processor:d58a0ae0243ccf429d0fe5be39e63da91f04eb20
     environment:
       - NODE_ENV=production
     secrets:
@@ -142,7 +142,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-signals-processor:11291bd9ede2e2ccacd2aa42a363dc38c8902a2b
+    image: jesuswebdev/binance-trader-signals-processor:d58a0ae0243ccf429d0fe5be39e63da91f04eb20
     environment:
       - NODE_ENV=production
     secrets:
@@ -169,7 +169,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-positions-processor:11291bd9ede2e2ccacd2aa42a363dc38c8902a2b
+    image: jesuswebdev/binance-trader-positions-processor:d58a0ae0243ccf429d0fe5be39e63da91f04eb20
     environment:
       - NODE_ENV=production
     secrets:
@@ -195,7 +195,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-trader:11291bd9ede2e2ccacd2aa42a363dc38c8902a2b
+    image: jesuswebdev/binance-trader-trader:d58a0ae0243ccf429d0fe5be39e63da91f04eb20
     environment:
       - NODE_ENV=production
     secrets:
