@@ -50,25 +50,19 @@ http
 
     const [db] = await Promise.all([initDb(), broker.initializeConnection()]);
 
-    const terminate = () => {
-      logger.info('Exiting Trader');
+    function terminate(event: NodeJS.Signals) {
+      logger.info({ event }, 'Terminating Trader');
 
       Promise.all([db.destroy(), broker.close()]).then(() => {
         logger.info('Trader terminated');
         process.exit();
       });
-    };
+    }
 
     process.on('SIGINT', terminate);
     process.on('SIGTERM', terminate);
-    process.on('unhandledRejection', (reason) => {
-      logger.error(reason);
-      terminate();
-    });
-    process.on('uncaughtException', (error) => {
-      logger.error(error);
-      terminate();
-    });
+    process.on('unhandledRejection', terminate);
+    process.on('uncaughtException', terminate);
 
     // =========== DEAD LETTER EXCHANGE ===============
 

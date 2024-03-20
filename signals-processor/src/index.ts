@@ -34,8 +34,8 @@ http
       broker.initializeConnection(),
     ]);
 
-    const terminate = () => {
-      logger.info('Exiting Signals Processor');
+    function terminate(event: NodeJS.Signals) {
+      logger.info({ event }, 'Terminating Signals Processor');
 
       Promise.all([db.destroy(), redis.disconnect(), broker.close()]).then(
         () => {
@@ -43,22 +43,16 @@ http
           process.exit();
         },
       );
-    };
+    }
 
     process.on('SIGINT', terminate);
     process.on('SIGTERM', terminate);
-    process.on('unhandledRejection', (reason) => {
-      logger.error(reason);
-      terminate();
-    });
-    process.on('uncaughtException', (error) => {
-      logger.error(error);
-      terminate();
-    });
+    process.on('unhandledRejection', terminate);
+    process.on('uncaughtException', terminate);
 
-    const msgHandler = async (msg: CandleTickData) => {
+    async function msgHandler(msg: CandleTickData) {
       await processSignals({ broker, redis, database: db, candle: msg });
-    };
+    }
 
     broker
       .listen(POSITION_EVENTS.POSITION_PROCESSED, msgHandler)

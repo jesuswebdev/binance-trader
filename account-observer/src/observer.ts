@@ -227,8 +227,8 @@ export default class AccountObserver {
     process.on('unhandledRejection', this.terminate.bind(this));
   }
 
-  private terminate() {
-    logger.info('Terminating Account Observer');
+  private terminate(event: NodeJS.Signals) {
+    logger.info({ event }, 'Terminating Account Observer');
 
     this.database.destroy().then(() => {
       const client = this.client;

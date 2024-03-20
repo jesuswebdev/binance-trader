@@ -51,8 +51,8 @@ http
       broker.initializeConnection(),
     ]);
 
-    function terminate() {
-      logger.info('Exiting Candles Processor');
+    function terminate(event: NodeJS.Signals) {
+      logger.info({ event }, 'Terminating Candles Processor');
 
       Promise.all([db.destroy(), redis.disconnect(), broker.close()]).then(
         () => {
@@ -64,14 +64,8 @@ http
 
     process.on('SIGINT', terminate);
     process.on('SIGTERM', terminate);
-    process.on('unhandledRejection', function (reason) {
-      logger.error(reason);
-      terminate();
-    });
-    process.on('uncaughtException', function (error) {
-      logger.error(error);
-      terminate();
-    });
+    process.on('unhandledRejection', terminate);
+    process.on('uncaughtException', terminate);
 
     async function msgHandler(data: CandleTickData) {
       const candles = await processCandleTick({

@@ -35,34 +35,28 @@ http
 
     const [db] = await Promise.all([initDb(), broker.initializeConnection()]);
 
-    const terminate = () => {
-      logger.info('Exiting Candles Processor');
+    function terminate(event: NodeJS.Signals) {
+      logger.info({ event }, 'Terminating Candles Processor');
 
       Promise.all([db.destroy(), broker.close()]).then(() => {
         logger.info('Candles Processor terminated');
         process.exit(1);
       });
-    };
+    }
 
     process.on('SIGINT', terminate);
     process.on('SIGTERM', terminate);
-    process.on('unhandledRejection', (reason) => {
-      logger.error(reason);
-      terminate();
-    });
-    process.on('uncaughtException', (error) => {
-      logger.error(error);
-      terminate();
-    });
+    process.on('unhandledRejection', terminate);
+    process.on('uncaughtException', terminate);
 
-    const candleProcessedHandler = async (data: CandleTickData) => {
+    async function candleProcessedHandler(data: CandleTickData) {
       await processOpenPositions({ database: db, candle: data, broker });
       broker.publish(POSITION_EVENTS.POSITION_PROCESSED, data);
-    };
+    }
 
-    const signalClosedHandler = async (data: SignalAttributes) => {
+    async function signalClosedHandler(data: SignalAttributes) {
       await createPosition({ database: db, broker, signal: data });
-    };
+    }
 
     broker
       .listen(CANDLE_EVENTS.CANDLE_PROCESSED, candleProcessedHandler)

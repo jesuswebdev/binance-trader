@@ -100,8 +100,8 @@ class Observer {
     });
   }
 
-  private terminate() {
-    logger.info('Terminating Markets Observer');
+  private terminate(event: NodeJS.Signals) {
+    logger.info({ event }, 'Terminating Markets Observer');
 
     this.broker?.close().then(() => {
       const client = this.client;
