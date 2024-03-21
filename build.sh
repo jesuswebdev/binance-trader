@@ -1,6 +1,6 @@
 #!/bin/bash
 
-commit_hash=$1
+commit_hash="$(git rev-parse HEAD)"
 
 if [ -z $commit_hash ]; 
 then 
