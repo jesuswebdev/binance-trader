@@ -1,4 +1,5 @@
 import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
+import events from 'events';
 import {
   MessageBrokerExchangeTypes,
   MESSAGE_BROKER_EXCHANGE_TYPES,
@@ -8,21 +9,28 @@ import {
   MessageBrokerPublishOptions,
 } from '../interfaces';
 
-interface MessageBrokerConstructorOptions {
-  uri: string;
+type BrokerConnectionOptions = {
+  protocol: string;
+  hostname: string;
+  username: string;
+  password: string;
+};
+
+type MessageBrokerConstructorOptions = {
+  connectionOptions: BrokerConnectionOptions;
   exchange: string;
   queue?: string;
   exchangeType?: MessageBrokerExchangeTypes;
   autoAck?: boolean;
-}
+};
 
 export interface OnMessageHandler<T> {
   (data: T, msg: ConsumeMessage): Promise<void> | void;
 }
 
 // eslint-disable-next-line
-export class MessageBroker<T = any> {
-  private readonly uri: string;
+export class MessageBroker<T = any> extends events.EventEmitter {
+  private readonly connectionOptions: BrokerConnectionOptions;
   private readonly exchange: string;
   private readonly exchangeType: MessageBrokerExchangeTypes;
   private readonly queue: string | undefined;
@@ -30,7 +38,8 @@ export class MessageBroker<T = any> {
   private channel: Channel | undefined;
 
   constructor(options: MessageBrokerConstructorOptions) {
-    this.uri = options.uri;
+    super();
+    this.connectionOptions = options.connectionOptions;
     this.exchange = options.exchange;
     this.queue = options.queue;
     this.exchangeType =
@@ -42,15 +51,26 @@ export class MessageBroker<T = any> {
   }
 
   async initializeConnection() {
-    if (!this.uri) {
-      throw new Error('Message Broker URI is not defined');
+    if (!this.connectionOptions) {
+      throw new Error('Message Broker Connection Options is not defined');
     }
 
     if (!this.exchange) {
       throw new Error('Message Broker Exchange is not defined');
     }
 
-    const connection = await connect(this.uri);
+    const connection = await connect({
+      heartbeat: 15,
+      vhost: '/',
+      protocol: this.connectionOptions.protocol,
+      hostname: this.connectionOptions.hostname,
+      username: this.connectionOptions.username,
+      password: this.connectionOptions.password,
+    });
+
+    connection.on('close', (error) => {
+      this.emit('error', error);
+    });
 
     const channel = await connection.createChannel();
     await channel.assertExchange(this.exchange, this.exchangeType, {
@@ -117,13 +137,11 @@ export class MessageBroker<T = any> {
 
     this.channel?.consume(listenQueue?.queue, async (msg) => {
       if (msg !== null) {
-        const content = this.decodeMessage(msg);
-
         try {
           if (handler instanceof Promise) {
-            await handler(content, msg);
+            await handler(this.decodeMessage(msg), msg);
           } else {
-            handler(content, msg);
+            handler(this.decodeMessage(msg), msg);
           }
           this.channel?.ack(msg);
         } catch (error) {
