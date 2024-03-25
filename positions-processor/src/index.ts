@@ -8,7 +8,13 @@ import {
   SIGNAL_EVENTS,
 } from '@binance-trader/shared';
 import http from 'http';
-import { HEALTHCHECK_PORT, MESSAGE_BROKER_URI } from './config';
+import {
+  HEALTHCHECK_PORT,
+  MESSAGE_BROKER_HOST,
+  MESSAGE_BROKER_PASSWORD,
+  MESSAGE_BROKER_PROTOCOL,
+  MESSAGE_BROKER_USER,
+} from './config';
 import { initDb } from './config/database';
 import {
   createPosition,
@@ -28,14 +34,19 @@ http
     logger.info('Starting Positions Processor');
 
     const broker = new MessageBroker({
+      connectionOptions: {
+        protocol: MESSAGE_BROKER_PROTOCOL,
+        hostname: MESSAGE_BROKER_HOST,
+        username: MESSAGE_BROKER_USER,
+        password: MESSAGE_BROKER_PASSWORD,
+      },
       exchange: EXCHANGE_TYPES.MAIN,
-      uri: MESSAGE_BROKER_URI,
       queue: 'positions-processor',
     });
 
     const [db] = await Promise.all([initDb(), broker.initializeConnection()]);
 
-    function terminate(event: NodeJS.Signals) {
+    function terminate(event: NodeJS.Signals | 'error') {
       logger.info({ event }, 'Terminating Candles Processor');
 
       Promise.all([db.destroy(), broker.close()]).then(() => {
@@ -48,6 +59,10 @@ http
     process.on('SIGTERM', terminate);
     process.on('unhandledRejection', terminate);
     process.on('uncaughtException', terminate);
+    broker.on('error', (error) => {
+      logger.error(error);
+      terminate('error');
+    });
 
     async function candleProcessedHandler(data: CandleTickData) {
       await processOpenPositions({ database: db, candle: data, broker });
