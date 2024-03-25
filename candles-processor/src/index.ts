@@ -10,7 +10,10 @@ import {
   BINANCE_API_SECRET,
   BINANCE_API_URL,
   HEALTHCHECK_PORT,
-  MESSAGE_BROKER_URI,
+  MESSAGE_BROKER_HOST,
+  MESSAGE_BROKER_PASSWORD,
+  MESSAGE_BROKER_PROTOCOL,
+  MESSAGE_BROKER_USER,
 } from './config';
 import { initDb } from './config/database';
 import { initRedis } from './config/redis';
@@ -40,8 +43,13 @@ http
     });
 
     const broker = new MessageBroker<CandleTickData>({
+      connectionOptions: {
+        protocol: MESSAGE_BROKER_PROTOCOL,
+        hostname: MESSAGE_BROKER_HOST,
+        username: MESSAGE_BROKER_USER,
+        password: MESSAGE_BROKER_PASSWORD,
+      },
       exchange: EXCHANGE_TYPES.MAIN,
-      uri: MESSAGE_BROKER_URI,
       queue: 'candles-processor',
     });
 
@@ -51,7 +59,7 @@ http
       broker.initializeConnection(),
     ]);
 
-    function terminate(event: NodeJS.Signals) {
+    function terminate(event: NodeJS.Signals | 'error') {
       logger.info({ event }, 'Terminating Candles Processor');
 
       Promise.all([db.destroy(), redis.disconnect(), broker.close()]).then(
@@ -81,6 +89,11 @@ http
         broker.publish(CANDLE_EVENTS.CANDLE_PROCESSED, data);
       }
     }
+
+    broker.on('error', (error) => {
+      logger.error(error);
+      terminate('error');
+    });
 
     broker
       .listen(CANDLE_EVENTS.CANDLE_TICK, msgHandler)
