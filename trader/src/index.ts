@@ -13,7 +13,10 @@ import {
   BINANCE_API_SECRET,
   BINANCE_API_URL,
   HEALTHCHECK_PORT,
-  MESSAGE_BROKER_URI,
+  MESSAGE_BROKER_HOST,
+  MESSAGE_BROKER_PASSWORD,
+  MESSAGE_BROKER_PROTOCOL,
+  MESSAGE_BROKER_USER,
 } from './config';
 import { initDb } from './config/database';
 import {
@@ -43,14 +46,19 @@ http
     });
 
     const broker = new MessageBroker({
+      connectionOptions: {
+        protocol: MESSAGE_BROKER_PROTOCOL,
+        hostname: MESSAGE_BROKER_HOST,
+        username: MESSAGE_BROKER_USER,
+        password: MESSAGE_BROKER_PASSWORD,
+      },
       exchange: EXCHANGE_TYPES.MAIN,
-      uri: MESSAGE_BROKER_URI,
       queue: 'trader',
     });
 
     const [db] = await Promise.all([initDb(), broker.initializeConnection()]);
 
-    function terminate(event: NodeJS.Signals) {
+    function terminate(event: NodeJS.Signals | 'error') {
       logger.info({ event }, 'Terminating Trader');
 
       Promise.all([db.destroy(), broker.close()]).then(() => {
@@ -63,6 +71,10 @@ http
     process.on('SIGTERM', terminate);
     process.on('unhandledRejection', terminate);
     process.on('uncaughtException', terminate);
+    broker.on('error', (error) => {
+      logger.error(error);
+      terminate('error');
+    });
 
     // =========== DEAD LETTER EXCHANGE ===============
 
