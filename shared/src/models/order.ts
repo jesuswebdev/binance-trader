@@ -2,7 +2,7 @@ import mongoose, { SchemaOptions } from 'mongoose';
 import { OrderAttributes } from '../interfaces/order';
 
 export function createOrderSchema(options: SchemaOptions = {}) {
-  const schema = new mongoose.Schema<OrderAttributes>(
+  return new mongoose.Schema<OrderAttributes>(
     {
       symbol: { type: String },
       orderId: { type: Number },
@@ -27,11 +27,8 @@ export function createOrderSchema(options: SchemaOptions = {}) {
       lastCancelAttempt: { type: Number },
     },
     { timestamps: true, ...options },
-  );
-
-  schema.index({ orderId: -1, symbol: -1 }, { unique: true });
-  schema.index({ status: 1, time: 1 });
-  schema.index({ clientOrderId: 1 });
-
-  return schema;
+  )
+    .index({ orderId: -1, symbol: -1 }, { unique: true })
+    .index({ status: 1, time: 1 })
+    .index({ clientOrderId: 1 });
 }

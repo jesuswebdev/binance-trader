@@ -4,7 +4,7 @@ import { MarketAttributes } from '../interfaces';
 import { PAIRS } from '../';
 
 export function createMarketSchema(options: SchemaOptions = {}) {
-  const schema = new mongoose.Schema<MarketAttributes>(
+  return new mongoose.Schema<MarketAttributes>(
     {
       symbol: {
         type: String,
@@ -26,10 +26,7 @@ export function createMarketSchema(options: SchemaOptions = {}) {
       trader_lock: { type: Boolean },
     },
     { timestamps: true, ...options },
-  );
-
-  schema.index({ symbol: 1 }, { unique: true });
-  schema.index({ trader_lock: 1, last_trader_lock_update: 1 });
-
-  return schema;
+  )
+    .index({ symbol: 1 }, { unique: true })
+    .index({ trader_lock: 1, last_trader_lock_update: 1 });
 }

@@ -1,16 +1,16 @@
 import mongoose, { SchemaOptions } from 'mongoose';
 import { AccountAttributes } from '../interfaces/account';
 
-const assetSubsSchema = new mongoose.Schema(
-  {
-    asset: { type: String },
-    free: { type: Number },
-  },
-  { _id: false },
-);
-
 export function createAccountSchema(options: SchemaOptions = {}) {
-  const schema = new mongoose.Schema<AccountAttributes>(
+  const assetSubsSchema = new mongoose.Schema(
+    {
+      asset: { type: String },
+      free: { type: Number },
+    },
+    { _id: false },
+  );
+
+  return new mongoose.Schema<AccountAttributes>(
     {
       id: { type: String },
       balances: {
@@ -23,9 +23,5 @@ export function createAccountSchema(options: SchemaOptions = {}) {
       create_order_after: { type: Number },
     },
     { timestamps: true, ...options },
-  );
-
-  schema.index({ id: 1 }, { unique: true });
-
-  return schema;
+  ).index({ id: 1 }, { unique: true });
 }

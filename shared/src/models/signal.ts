@@ -4,7 +4,7 @@ import { numberSchemaValidation } from '../index';
 import { SignalAttributes } from '../interfaces/signal';
 
 export function createSignalSchema(options: SchemaOptions = {}) {
-  const schema = new Schema<SignalAttributes>(
+  return new Schema<SignalAttributes>(
     {
       id: { type: String, required: true },
       time: { type: Number, required: true, validate: numberSchemaValidation },
@@ -43,13 +43,10 @@ export function createSignalSchema(options: SchemaOptions = {}) {
       trader_lock: { type: Boolean, default: false },
     },
     { timestamps: true, ...options },
-  );
-
-  schema.index({ 'buy_order.orderId': 1 });
-  schema.index({ 'close_candle.id': 1 });
-  schema.index({ symbol: 1, status: 1, trigger_time: -1 });
-  schema.index({ symbol: 1, status: 1, close_time: -1 });
-  schema.index({ id: 1 }, { unique: true });
-
-  return schema;
+  )
+    .index({ 'buy_order.orderId': 1 })
+    .index({ 'close_candle.id': 1 })
+    .index({ symbol: 1, status: 1, trigger_time: -1 })
+    .index({ symbol: 1, status: 1, close_time: -1 })
+    .index({ id: 1 }, { unique: true });
 }

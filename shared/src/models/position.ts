@@ -8,7 +8,7 @@ import { numberSchemaValidation } from '../index';
 import { PositionAttributes } from '../interfaces/position';
 
 export function createPositionSchema(options: SchemaOptions = {}) {
-  const schema = new Schema<PositionAttributes>(
+  return new Schema<PositionAttributes>(
     {
       id: { type: String, required: true, unique: true },
       symbol: { type: String, required: true },
@@ -67,15 +67,12 @@ export function createPositionSchema(options: SchemaOptions = {}) {
       entry_signal_discord_message_id: { type: Number },
     },
     { timestamps: true, ...options },
-  );
-
-  schema.index({ 'buy_order.orderId': 1 });
-  schema.index({ 'sell_order.orderId': 1 });
-  schema.index({ symbol: 1, status: 1 });
-  schema.index({ status: 1, close_time: 1 });
-  schema.index({ symbol: 1, status: 1, open_time: -1 });
-  schema.index({ id: 1, signal: 1 });
-  schema.index({ id: 1, 'buy_order.orderId': 1 });
-
-  return schema;
+  )
+    .index({ 'buy_order.orderId': 1 })
+    .index({ 'sell_order.orderId': 1 })
+    .index({ symbol: 1, status: 1 })
+    .index({ status: 1, close_time: 1 })
+    .index({ symbol: 1, status: 1, open_time: -1 })
+    .index({ id: 1, signal: 1 })
+    .index({ id: 1, 'buy_order.orderId': 1 });
 }

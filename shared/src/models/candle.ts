@@ -4,7 +4,7 @@ import { CandleAttributes } from '../interfaces/candle';
 import { PAIRS } from '../';
 
 export function createCandleSchema(options: SchemaOptions = {}) {
-  const schema = new mongoose.Schema<CandleAttributes>(
+  return new mongoose.Schema<CandleAttributes>(
     {
       id: { type: String, required: true, index: true },
       symbol: {
@@ -98,15 +98,12 @@ export function createCandleSchema(options: SchemaOptions = {}) {
       ha_low: { type: Number, validate: numberSchemaValidation },
     },
     { timestamps: true, ...options },
-  );
-
-  schema.index({ symbol: 1, open_time: 1 });
-  schema.index({ symbol: 1, interval: 1, open_time: 1 });
-  schema.index({ symbol: 1, interval: 1, open_time: -1 });
-  schema.index(
-    { createdAt: 1 },
-    { expires: getTimeDiff(180, process.env.CANDLE_INTERVAL ?? '') / 1000 },
-  );
-
-  return schema;
+  )
+    .index({ symbol: 1, open_time: 1 })
+    .index({ symbol: 1, interval: 1, open_time: 1 })
+    .index({ symbol: 1, interval: 1, open_time: -1 })
+    .index(
+      { createdAt: 1 },
+      { expires: getTimeDiff(180, process.env.CANDLE_INTERVAL ?? '') / 1000 },
+    );
 }
