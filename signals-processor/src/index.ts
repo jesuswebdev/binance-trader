@@ -4,7 +4,13 @@ import {
   MessageBroker,
   POSITION_EVENTS,
 } from '@binance-trader/shared';
-import { HEALTHCHECK_PORT, MESSAGE_BROKER_URI } from './config';
+import {
+  HEALTHCHECK_PORT,
+  MESSAGE_BROKER_HOST,
+  MESSAGE_BROKER_PASSWORD,
+  MESSAGE_BROKER_PROTOCOL,
+  MESSAGE_BROKER_USER,
+} from './config';
 import { initDb } from './config/database';
 import { initRedis } from './config/redis';
 import { processSignals } from './entity/signal/controller';
@@ -23,8 +29,13 @@ http
     logger.info('Starting Signals Processor');
 
     const broker = new MessageBroker({
+      connectionOptions: {
+        protocol: MESSAGE_BROKER_PROTOCOL,
+        hostname: MESSAGE_BROKER_HOST,
+        username: MESSAGE_BROKER_USER,
+        password: MESSAGE_BROKER_PASSWORD,
+      },
       exchange: EXCHANGE_TYPES.MAIN,
-      uri: MESSAGE_BROKER_URI,
       queue: 'signals-processor',
     });
 
@@ -34,7 +45,7 @@ http
       broker.initializeConnection(),
     ]);
 
-    function terminate(event: NodeJS.Signals) {
+    function terminate(event: NodeJS.Signals | 'error') {
       logger.info({ event }, 'Terminating Signals Processor');
 
       Promise.all([db.destroy(), redis.disconnect(), broker.close()]).then(
@@ -49,6 +60,10 @@ http
     process.on('SIGTERM', terminate);
     process.on('unhandledRejection', terminate);
     process.on('uncaughtException', terminate);
+    broker.on('error', (error) => {
+      logger.error(error);
+      terminate('error');
+    });
 
     async function msgHandler(msg: CandleTickData) {
       await processSignals({ broker, redis, database: db, candle: msg });
