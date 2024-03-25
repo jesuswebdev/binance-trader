@@ -7,7 +7,13 @@ import {
   Pair,
 } from '@binance-trader/shared';
 import { KlineUpdateEvent } from './utils/interfaces';
-import { BINANCE_STREAM_URI, MESSAGE_BROKER_URI } from './config';
+import {
+  BINANCE_STREAM_URI,
+  MESSAGE_BROKER_HOST,
+  MESSAGE_BROKER_PASSWORD,
+  MESSAGE_BROKER_PROTOCOL,
+  MESSAGE_BROKER_USER,
+} from './config';
 import logger from './utils/logger';
 
 interface constructorOptions {
@@ -100,7 +106,7 @@ class Observer {
     });
   }
 
-  private terminate(event: NodeJS.Signals) {
+  private terminate(event: NodeJS.Signals | 'error') {
     logger.info({ event }, 'Terminating Markets Observer');
 
     this.broker?.close().then(() => {
@@ -137,7 +143,12 @@ class Observer {
 
     this.broker = new MessageBroker<CandleTickData>({
       exchange: EXCHANGE_TYPES.MAIN,
-      uri: MESSAGE_BROKER_URI,
+      connectionOptions: {
+        protocol: MESSAGE_BROKER_PROTOCOL,
+        hostname: MESSAGE_BROKER_HOST,
+        username: MESSAGE_BROKER_USER,
+        password: MESSAGE_BROKER_PASSWORD,
+      },
     });
 
     await this.broker.initializeConnection();
@@ -158,6 +169,10 @@ class Observer {
     process.on('SIGTERM', this.terminate.bind(this));
     process.on('unhandledRejection', this.terminate.bind(this));
     process.on('uncaughtException', this.terminate.bind(this));
+    this.broker.on('error', (error) => {
+      logger.error(error);
+      this.terminate('error');
+    });
 
     logger.info('Markets Observer started');
   }
