@@ -4,7 +4,7 @@ import { createCandleModel } from '../entity/candle/model';
 import { createMarketModel } from '../entity/market/model';
 import logger from '../utils/logger';
 
-export const initDb = async () => {
+export async function initDb() {
   const connection = await mongoose
     .createConnection(DATABASE_URI, { authSource: 'admin' })
     .asPromise();
@@ -17,4 +17,4 @@ export const initDb = async () => {
   logger.info('MongoDB connection established');
 
   return connection;
-};
+}
