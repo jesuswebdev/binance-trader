@@ -21,11 +21,14 @@ function getSignature(query: string, apiSecret: string) {
   return crypto.createHmac('sha256', apiSecret).update(query).digest('hex');
 }
 
-const getBinanceInstance = ({
+// eslint-disable-next-line
+export interface BinanceApiInstance extends AxiosInstance {}
+
+export function getBinanceInstance({
   apiUrl,
   apiKey,
   apiSecret,
-}: GetBinanceInstanceProps): AxiosInstance => {
+}: GetBinanceInstanceProps): AxiosInstance {
   if (!apiUrl) {
     throw new Error('Binance API URL is not defined');
   }
@@ -64,6 +67,6 @@ const getBinanceInstance = ({
   );
 
   return binance;
-};
+}
 
 export default getBinanceInstance;
