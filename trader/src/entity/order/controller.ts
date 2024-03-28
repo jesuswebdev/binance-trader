@@ -6,17 +6,14 @@ import {
   DATABASE_MODELS,
   LeanAccountDocument,
   LeanMarketDocument,
-  LeanOrderDocument,
   LeanPositionDocument,
   MarketModel,
   MessageBroker,
-  MILLISECONDS,
   nz,
   OrderAttributes,
   OrderModel,
   PAIRS,
   PositionModel,
-  POSITION_EVENTS,
   POSITION_STATUS,
   SIGNAL_TYPES,
   toSymbolPrecision,
@@ -26,11 +23,9 @@ import { AxiosInstance } from 'axios';
 import { Connection } from 'mongoose';
 import {
   BINANCE_MINIMUM_ORDER_SIZE,
-  BUY_ORDER_TTL,
   BUY_ORDER_TYPE,
   DEFAULT_BUY_AMOUNT,
   MINUTES_BETWEEN_CANCEL_ATTEMPTS,
-  SELL_ORDER_TTL,
   SELL_ORDER_TYPE,
 } from '../../config';
 import { parseOrder } from '../../utils';
@@ -788,96 +783,5 @@ export async function createSellOrderForCanceledOrder({
     await marketModel
       .updateOne({ symbol: position.symbol }, { $set: { trader_lock: false } })
       .hint('symbol_1');
-  }
-}
-
-type CancelUnfilledOrdersProps = ServicesProps;
-
-export async function cancelUnfilledOrders({
-  database,
-  binance,
-  broker,
-}: CancelUnfilledOrdersProps) {
-  const positionModel: PositionModel = database.model(DATABASE_MODELS.POSITION);
-  const orderModel: OrderModel = database.model(DATABASE_MODELS.ORDER);
-
-  const orders: LeanOrderDocument[] = await orderModel
-    .find({
-      $and: [
-        {
-          status: {
-            $nin: [BINANCE_ORDER_STATUS.FILLED, BINANCE_ORDER_STATUS.CANCELED],
-          },
-        },
-        { time: { $gt: Date.now() - MILLISECONDS.HOUR } },
-      ],
-    })
-    .select({
-      side: true,
-      type: true,
-      eventTime: true,
-      clientOrderId: true,
-      symbol: true,
-      orderId: true,
-      lastCancelAttempt: true,
-    })
-    .hint('status_1_time_1')
-    .lean();
-
-  const filteredOrders = orders.filter((order) => {
-    const canAttemptToCancelOrder =
-      (order.lastCancelAttempt ?? 0) + MINUTES_BETWEEN_CANCEL_ATTEMPTS <
-      Date.now();
-    const shouldCancelBuyOrder =
-      order.side === 'BUY' &&
-      order.type === BINANCE_ORDER_TYPES.LIMIT &&
-      Date.now() > order.eventTime + BUY_ORDER_TTL;
-    const shouldCancelSellOrder =
-      order.side === 'SELL' &&
-      order.type === BINANCE_ORDER_TYPES.LIMIT &&
-      Date.now() > order.eventTime + SELL_ORDER_TTL;
-
-    return (
-      (shouldCancelBuyOrder || shouldCancelSellOrder) && canAttemptToCancelOrder
-    );
-  });
-
-  if (filteredOrders.length > 0) {
-    for (const order of filteredOrders) {
-      // order not placed via Web UI
-      if (!(order.clientOrderId ?? '').match(/web_/)) {
-        const tradeQuery = new URLSearchParams({
-          symbol: order.symbol,
-          orderId: order.orderId.toString(),
-        }).toString();
-
-        await orderModel
-          .updateOne(
-            { $and: [{ orderId: order.orderId }, { symbol: order.symbol }] },
-            { $set: { lastCancelAttempt: Date.now() } },
-          )
-          .hint('orderId_-1_symbol_-1');
-
-        try {
-          await binance.delete(`/api/v3/order?${tradeQuery}`);
-        } catch (error: unknown) {
-          logger.error(error);
-          // update order in database, next time this function runs it will have the updated order
-          await getOrderFromBinance({ database, binance, order });
-          continue;
-        }
-
-        if (order.side === SIGNAL_TYPES.SELL) {
-          const position = await positionModel
-            .findOne({ 'sell_order.orderId': order.orderId })
-            .hint('sell_order.orderId_1')
-            .lean();
-
-          if (position) {
-            broker.publish(POSITION_EVENTS.POSITION_CLOSED_REQUEUE, position);
-          }
-        }
-      }
-    }
   }
 }
