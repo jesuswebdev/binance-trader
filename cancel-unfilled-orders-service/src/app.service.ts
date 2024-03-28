@@ -14,7 +14,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Position } from './position/position.schema';
-import { LeanOrderDocument, Order } from './order/order.schema';
+import { Order, OrderDocument } from './order/order.schema';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class AppService {
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   async handleCron() {
-    const orders: LeanOrderDocument[] = await this.orderModel
+    const orders: OrderDocument[] = await this.orderModel
       .find({
         $and: [
           {
@@ -132,9 +132,7 @@ export class AppService {
     }
   }
 
-  async fetchOrderFromBinance(
-    order: OrderAttributes,
-  ): Promise<LeanOrderDocument> {
+  async fetchOrderFromBinance(order: OrderAttributes): Promise<OrderDocument> {
     if (!order) {
       throw new Error('Order is not defined.');
     }
@@ -150,7 +148,7 @@ export class AppService {
       return;
     }
 
-    const updatedOrder: LeanOrderDocument = await this.orderModel
+    const updatedOrder: OrderDocument = await this.orderModel
       .findOneAndUpdate(
         { $and: [{ symbol: order.symbol }, { orderId: data.orderId }] },
         { $set: this.parseOrder(data) },

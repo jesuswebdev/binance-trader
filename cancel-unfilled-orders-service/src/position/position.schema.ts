@@ -1,9 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, LeanType, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
 export type PositionDocument = HydratedDocument<Position>;
-
-export type LeanPositionDocument = LeanType<PositionDocument>;
 
 @Schema({ timestamps: true })
 export class Position {
