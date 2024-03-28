@@ -71,6 +71,10 @@ export class AppService {
       position.symbol,
     );
 
+    this.logger.log(
+      `Updating position with ID '${position_id}' and order ID '${order_id}'. Market price: ${marketPrice}`,
+    );
+
     await this.positionModel.updateOne(
       { _id: new Types.ObjectId(position_id) },
       {
