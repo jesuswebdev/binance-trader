@@ -5,7 +5,6 @@ import {
   MessageBroker,
   OrderAttributes,
   POSITION_EVENTS,
-  BinanceApiInstance,
   BINANCE_ORDER_STATUS,
   MILLISECONDS,
   BINANCE_ORDER_TYPES,
@@ -16,6 +15,7 @@ import { Model } from 'mongoose';
 import { Position } from './position/position.schema';
 import { Order, OrderDocument } from './order/order.schema';
 import { ConfigService } from '@nestjs/config';
+import { AxiosInstance } from 'axios';
 
 @Injectable()
 export class AppService {
@@ -23,7 +23,7 @@ export class AppService {
 
   constructor(
     @Inject(SERVICES.MESSAGE_BROKER) private brokerService: MessageBroker,
-    @Inject(SERVICES.BINANCE_API) private binanceApi: BinanceApiInstance,
+    @Inject(SERVICES.BINANCE_API) private binanceApi: AxiosInstance,
     @InjectModel(Position.name) private positionModel: Model<Position>,
     @InjectModel(Order.name) private orderModel: Model<Order>,
     @Inject(ConfigService) private configService: ConfigService,
