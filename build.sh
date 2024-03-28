@@ -6,7 +6,7 @@ if [ -z $commit_hash ];
 then 
     echo "Commit hash cannot be empty"; 
 else
-    services='account-observer candles-processor markets-observer positions-processor signals-processor trader'
+    services='account-observer candles-processor markets-observer positions-processor signals-processor trader cancel-unfilled-orders-service'
 
     for service in $services
     do
