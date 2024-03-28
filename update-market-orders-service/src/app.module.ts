@@ -63,9 +63,9 @@ import { SERVICES } from './utils/constants';
           process.exit(1);
         });
 
-        broker.listen(
-          ORDER_EVENTS.MARKET_BUY_ORDER_CREATED,
-          appService.updateMarketBuyOrder,
+        // https://github.com/nestjs/nest/issues/5147#issuecomment-1329110784
+        broker.listen(ORDER_EVENTS.MARKET_BUY_ORDER_CREATED, (msg) =>
+          appService.updateMarketBuyOrder(msg),
         );
 
         return broker;
