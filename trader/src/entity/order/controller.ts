@@ -328,6 +328,8 @@ export async function createBuyOrder({
       await positionModel
         .updateOne({ id: position.id }, { $set: { buy_order: data } })
         .hint('id_1');
+
+      return createdOrder;
     }
   } catch (error: unknown) {
     logger.error(error);

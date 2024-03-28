@@ -5,6 +5,8 @@ import {
   MESSAGE_BROKER_EXCHANGE_TYPES,
   MILLISECONDS,
   POSITION_EVENTS,
+  ORDER_EVENTS,
+  BINANCE_ORDER_TYPES,
 } from '@binance-trader/shared';
 import http from 'http';
 import getBinanceInstance from '@binance-trader/shared/build/binance-instance-creator';
@@ -12,6 +14,7 @@ import {
   BINANCE_API_KEY,
   BINANCE_API_SECRET,
   BINANCE_API_URL,
+  BUY_ORDER_TYPE,
   HEALTHCHECK_PORT,
   MESSAGE_BROKER_HOST,
   MESSAGE_BROKER_PASSWORD,
@@ -117,8 +120,20 @@ http
 
     // position created
 
-    const handlePositionCreated = (msg: LeanPositionDocument) =>
-      createBuyOrder({ database: db, binance, position: msg });
+    const handlePositionCreated = async (msg: LeanPositionDocument) => {
+      const createdOrder = await createBuyOrder({
+        database: db,
+        binance,
+        position: msg,
+      });
+
+      if (createdOrder && BUY_ORDER_TYPE === BINANCE_ORDER_TYPES.MARKET) {
+        broker.publish(ORDER_EVENTS.MARKET_BUY_ORDER_CREATED, {
+          position_id: msg._id,
+          order_id: createdOrder.orderId,
+        });
+      }
+    };
 
     broker
       .listen(POSITION_EVENTS.POSITION_CREATED, handlePositionCreated, {
