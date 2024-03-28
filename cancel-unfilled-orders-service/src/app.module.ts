@@ -32,8 +32,8 @@ import { Order, OrderSchema } from './order/order.schema';
         authSource: 'admin',
       }),
     }),
-    MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     MongooseModule.forFeature([
+      { name: Order.name, schema: OrderSchema },
       { name: Position.name, schema: PositionSchema },
     ]),
   ],
