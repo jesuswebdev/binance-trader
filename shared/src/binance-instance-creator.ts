@@ -21,9 +21,6 @@ function getSignature(query: string, apiSecret: string) {
   return crypto.createHmac('sha256', apiSecret).update(query).digest('hex');
 }
 
-// eslint-disable-next-line
-export interface BinanceApiInstance extends AxiosInstance {}
-
 export function getBinanceInstance({
   apiUrl,
   apiKey,
