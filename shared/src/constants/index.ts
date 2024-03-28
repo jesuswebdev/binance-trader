@@ -122,3 +122,10 @@ export const DATABASE_MODELS = {
 
 export type DatabaseModels =
   (typeof DATABASE_MODELS)[keyof typeof DATABASE_MODELS];
+
+export const ORDER_EVENTS = {
+  MARKET_BUY_ORDER_CREATED: 'order.market_buy.created',
+  MARKET_SELL_ORDER_CREATED: 'order.market_sell.created',
+} as const;
+
+export type OrderEvents = (typeof ORDER_EVENTS)[keyof typeof ORDER_EVENTS];
