@@ -64,6 +64,12 @@ export class AppService {
       return;
     }
 
+    if (position.sell_order) {
+      this.logger.log(`Position with ID '${position_id}' is closed. Skipping.`);
+
+      return;
+    }
+
     // update values
 
     const marketPrice = toSymbolPrecision(
