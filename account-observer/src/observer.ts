@@ -167,19 +167,6 @@ export default class AccountObserver {
               .hint('orderId_-1_symbol_-1');
           } catch (error) {
             logger.error(error);
-            await this.database
-              .model<OrderModel>(DATABASE_MODELS.ORDER)
-              .updateOne(
-                {
-                  $and: [
-                    { orderId: parsedOrder.orderId },
-                    { symbol: parsedOrder.symbol },
-                  ],
-                },
-                { $set: parsedOrder },
-                { upsert: true },
-              )
-              .hint('orderId_-1_symbol_-1');
           }
         }
       }
