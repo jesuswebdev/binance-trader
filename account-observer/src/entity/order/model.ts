@@ -17,6 +17,11 @@ export function createOrderModel(connection: Connection) {
         const query = this as UpdateQuery<OrderModel>;
         const doc = await query.model.findOne(query.getQuery()).lean();
 
+        // upsert
+        if (!doc) {
+          next();
+        }
+
         const updateObject = query.getUpdate();
 
         if (Reflect.has(updateObject['$set'], 'time')) {
