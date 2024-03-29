@@ -24,10 +24,10 @@ export function createOrderModel(connection: Connection) {
 
         const updateObject = query.getUpdate();
 
-        if (Reflect.has(updateObject['$set'], 'time')) {
-          if (updateObject['$set']['time'] <= doc.time) {
+        if (Reflect.has(updateObject['$set'], 'executedQty')) {
+          if (+updateObject['$set']['executedQty'] < doc.executedQty) {
             throw new Error(
-              'Invalid time value. Cannot update current document with old values.',
+              'Invalid executedQty value. Cannot update current document with old values.',
             );
           }
         }
