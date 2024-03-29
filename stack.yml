@@ -65,7 +65,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-account-observer:018b87614fbb50cf7f29e7f20857be4a2a355401
+    image: jesuswebdev/binance-trader-account-observer:416204b92420ddf1e81bdaa24007e9cadcd223b6
     environment:
       - NODE_ENV=production
     secrets:
@@ -244,7 +244,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:3000 || exit 1
-    image: jesuswebdev/binance-trader-update-market-orders-service:018b87614fbb50cf7f29e7f20857be4a2a355401
+    image: jesuswebdev/binance-trader-update-market-orders-service:22ff7ab9d4cb830736fb06e92059403a4ed14d17
     environment:
       - NODE_ENV=production
     secrets:
