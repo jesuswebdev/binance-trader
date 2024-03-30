@@ -5,6 +5,7 @@ import {
   LeanAccountDocument,
   MILLISECONDS,
   nz,
+  OrderAttributes,
   OrderModel,
   PAIRS,
 } from '@binance-trader/shared';
@@ -13,6 +14,7 @@ import { AxiosInstance } from 'axios';
 import { parseAccountUpdate, parseOrder } from './utils';
 import { BINANCE_STREAM_URI, ENVIRONMENT } from './config';
 import logger from './utils/logger';
+import { Queue } from './utils/queue';
 
 export default class AccountObserver {
   private readonly allowed_pairs: Map<string, boolean>;
@@ -20,6 +22,7 @@ export default class AccountObserver {
   private listenKeyKeepAliveInterval: NodeJS.Timer | null;
   private client: ws.WebSocket | undefined;
   private terminating: boolean;
+  private queue: Queue<Partial<OrderAttributes>>;
   constructor(
     private readonly database: Connection,
     private readonly binance: AxiosInstance,
@@ -36,6 +39,7 @@ export default class AccountObserver {
 
     this.listenKeyKeepAliveInterval = null;
     this.terminating = false;
+    this.queue = new Queue((order) => this.processOrderUpdate(order));
   }
 
   startListenKeyKeepAliveInterval(listenKey: string) {
@@ -124,6 +128,21 @@ export default class AccountObserver {
     return spot_account_listen_key;
   }
 
+  async processOrderUpdate(order: Partial<OrderAttributes>) {
+    try {
+      await this.database
+        .model<OrderModel>(DATABASE_MODELS.ORDER)
+        .updateOne(
+          { $and: [{ orderId: order.orderId }, { symbol: order.symbol }] },
+          { $set: order },
+          { upsert: true },
+        )
+        .hint('orderId_-1_symbol_-1');
+    } catch (error) {
+      logger.error(error);
+    }
+  }
+
   async init() {
     logger.info('Starting Account Observer');
 
@@ -151,23 +170,7 @@ export default class AccountObserver {
         const validPair = this.allowed_pairs.get(parsedOrder.symbol ?? '');
 
         if (parsedOrder.orderId && validPair) {
-          try {
-            await this.database
-              .model<OrderModel>(DATABASE_MODELS.ORDER)
-              .updateOne(
-                {
-                  $and: [
-                    { orderId: parsedOrder.orderId },
-                    { symbol: parsedOrder.symbol },
-                  ],
-                },
-                { $set: parsedOrder },
-                { upsert: true },
-              )
-              .hint('orderId_-1_symbol_-1');
-          } catch (error) {
-            logger.error(error);
-          }
+          this.queue.push(parsedOrder);
         }
       }
 
