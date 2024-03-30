@@ -1,10 +1,12 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Position } from './position/position.schema';
-import { Order } from './order/order.schema';
+import { Order, OrderDocument } from './order/order.schema';
 import { Model, Types } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
-import { toSymbolPrecision } from '@binance-trader/shared';
+import { OrderAttributes, toSymbolPrecision } from '@binance-trader/shared';
+import { SERVICES } from './utils/constants';
+import { AxiosInstance } from 'axios';
 
 @Injectable()
 export class AppService {
@@ -14,6 +16,7 @@ export class AppService {
     @InjectModel(Position.name) private positionModel: Model<Position>,
     @InjectModel(Order.name) private orderModel: Model<Order>,
     @Inject(ConfigService) private configService: ConfigService,
+    @Inject(SERVICES.BINANCE_API) private binanceApi: AxiosInstance,
   ) {}
 
   async updateMarketBuyOrder(payload: {
@@ -77,6 +80,11 @@ export class AppService {
       position.symbol,
     );
 
+    if (isNaN(marketPrice)) {
+      await this.fetchOrderFromBinance(order);
+      return this.updateMarketBuyOrder(payload);
+    }
+
     this.logger.log(
       `Updating position with ID '${position_id}' and order ID '${order_id}'. Market price: ${marketPrice}`,
     );
@@ -106,5 +114,53 @@ export class AppService {
         },
       },
     );
+  }
+
+  async fetchOrderFromBinance(order: OrderAttributes): Promise<OrderDocument> {
+    if (!order) {
+      throw new Error('Order is not defined.');
+    }
+
+    const query = new URLSearchParams({
+      orderId: order.orderId.toString(),
+      symbol: order.symbol,
+    }).toString();
+
+    const { data } = await this.binanceApi.get(`/api/v3/order?${query}`);
+
+    if (!data) {
+      return;
+    }
+
+    const updatedOrder: OrderDocument = await this.orderModel
+      .findOneAndUpdate(
+        { $and: [{ symbol: order.symbol }, { orderId: data.orderId }] },
+        { $set: this.parseOrder(data) },
+        { upsert: true, new: true },
+      )
+      .lean();
+
+    return updatedOrder;
+  }
+
+  parseOrder(order: Record<string, string>): Partial<OrderAttributes> {
+    return {
+      symbol: order.symbol,
+      orderId: +order.orderId,
+      orderListId: +order.orderListId,
+      clientOrderId: order.clientOrderId,
+      price: order.price,
+      origQty: order.origQty,
+      executedQty: order.executedQty,
+      cummulativeQuoteQty: order.cummulativeQuoteQty,
+      commissionAmount: order.commissionAmount,
+      commissionAsset: order.commissionAsset,
+      status: order.status,
+      timeInForce: order.timeInForce,
+      type: order.type,
+      side: order.side,
+      stopPrice: order.stopPrice,
+      time: +order.time,
+    };
   }
 }

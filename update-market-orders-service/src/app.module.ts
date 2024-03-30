@@ -8,6 +8,7 @@ import {
   EXCHANGE_TYPES,
   MessageBroker,
   ORDER_EVENTS,
+  getBinanceInstance,
 } from '@binance-trader/shared';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Order, OrderSchema } from './order/order.schema';
@@ -69,6 +70,19 @@ import { SERVICES } from './utils/constants';
         );
 
         return broker;
+      },
+    },
+    {
+      inject: [ConfigService],
+      provide: SERVICES.BINANCE_API,
+      useFactory: async (configService: ConfigService) => {
+        const binance = getBinanceInstance({
+          apiUrl: configService.get('BINANCE_API_URL'),
+          apiKey: configService.get('BINANCE_API_KEY'),
+          apiSecret: configService.get('BINANCE_API_SECRET'),
+        });
+
+        return binance;
       },
     },
   ],
