@@ -248,8 +248,7 @@ services:
     environment:
       - NODE_ENV=production
     secrets:
-    # uses the same env as positions processor
-      - source: positions-processor-env-v4
+      - source: update-market-orders-service-env-v1
         target: /usr/app/update-market-orders-service/.env.production
         uid: '1000'
         gid: '1000'
@@ -269,4 +268,6 @@ secrets:
   trader-env-v3:
     external: true
   cancel-unfilled-orders-service-env-v1:
+    external: true
+  update-market-orders-service-env-v1:
     external: true
