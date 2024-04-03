@@ -65,7 +65,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-account-observer:416204b92420ddf1e81bdaa24007e9cadcd223b6
+    image: jesuswebdev/binance-trader-account-observer:4aa749e099323516aeb80568c97a3593c8b8a8fe
     environment:
       - NODE_ENV=production
     secrets:
@@ -88,7 +88,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-markets-observer:018b87614fbb50cf7f29e7f20857be4a2a355401
+    image: jesuswebdev/binance-trader-markets-observer:4aa749e099323516aeb80568c97a3593c8b8a8fe
     environment:
       - NODE_ENV=production
     secrets:
@@ -114,7 +114,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-candles-processor:018b87614fbb50cf7f29e7f20857be4a2a355401
+    image: jesuswebdev/binance-trader-candles-processor:4aa749e099323516aeb80568c97a3593c8b8a8fe
     environment:
       - NODE_ENV=production
     secrets:
@@ -142,7 +142,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-signals-processor:018b87614fbb50cf7f29e7f20857be4a2a355401
+    image: jesuswebdev/binance-trader-signals-processor:4aa749e099323516aeb80568c97a3593c8b8a8fe
     environment:
       - NODE_ENV=production
     secrets:
@@ -169,7 +169,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-positions-processor:018b87614fbb50cf7f29e7f20857be4a2a355401
+    image: jesuswebdev/binance-trader-positions-processor:4aa749e099323516aeb80568c97a3593c8b8a8fe
     environment:
       - NODE_ENV=production
     secrets:
@@ -195,7 +195,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-trader:018b87614fbb50cf7f29e7f20857be4a2a355401
+    image: jesuswebdev/binance-trader-trader:4aa749e099323516aeb80568c97a3593c8b8a8fe
     environment:
       - NODE_ENV=production
     secrets:
@@ -221,7 +221,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:3000 || exit 1
-    image: jesuswebdev/binance-trader-cancel-unfilled-orders-service:018b87614fbb50cf7f29e7f20857be4a2a355401
+    image: jesuswebdev/binance-trader-cancel-unfilled-orders-service:4aa749e099323516aeb80568c97a3593c8b8a8fe
     environment:
       - NODE_ENV=production
     secrets:
@@ -244,7 +244,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:3000 || exit 1
-    image: jesuswebdev/binance-trader-update-market-orders-service:22ff7ab9d4cb830736fb06e92059403a4ed14d17
+    image: jesuswebdev/binance-trader-update-market-orders-service:4aa749e099323516aeb80568c97a3593c8b8a8fe
     environment:
       - NODE_ENV=production
     secrets:
