@@ -14,20 +14,20 @@ RUN npm ci --only=production --prefix ./shared \
 
 FROM node:20.12.0 as deps
 WORKDIR /usr/app
-COPY ./update-account-balance/package*.json ./update-account-balance/
+COPY ./update-account-balance-service/package*.json ./update-account-balance-service/
 COPY --from=shared ./usr/app/shared/package.json ./shared/
 COPY --from=shared ./usr/app/shared/build/ ./shared/build/
-RUN npm ci --only=production --prefix ./update-account-balance \
+RUN npm ci --only=production --prefix ./update-account-balance-service \
     && npm cache clean --force
 
 FROM node:20.12.0 as build
 WORKDIR /usr/app
 COPY --from=deps ./usr/app/ .
-COPY ./update-account-balance/ ./update-account-balance/
+COPY ./update-account-balance-service/ ./update-account-balance-service/
 ENV NODE_ENV production
-RUN npm install --include=dev --omit=peer --omit=optional --prefix ./update-account-balance \
+RUN npm install --include=dev --omit=peer --omit=optional --prefix ./update-account-balance-service \
     && npm cache clean --force \
-    && npm run build --prefix ./update-account-balance
+    && npm run build --prefix ./update-account-balance-service
 
 FROM node:20.12.0
 
@@ -40,7 +40,7 @@ WORKDIR /usr/app
 
 COPY --chown=node:node --from=deps ./usr/app/shared/ ./shared/
 COPY --chown=node:node --from=shared-deps ./usr/app/shared/node_modules ./shared/node_modules
-COPY --chown=node:node --from=deps ./usr/app/update-account-balance ./update-account-balance/
-COPY --chown=node:node --from=build ./usr/app/update-account-balance/build/ ./update-account-balance/build/
+COPY --chown=node:node --from=deps ./usr/app/update-account-balance-service ./update-account-balance-service/
+COPY --chown=node:node --from=build ./usr/app/update-account-balance-service/build/ ./update-account-balance-service/build/
 
-CMD [ "node", "./update-account-balance/build/main.js" ]
+CMD [ "node", "./update-account-balance-service/dist/main.js" ]
