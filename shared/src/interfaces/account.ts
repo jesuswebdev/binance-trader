@@ -13,6 +13,7 @@ export interface AccountAttributes {
   spot_account_listen_key: string;
   last_spot_account_listen_key_update: number;
   create_order_after: number;
+  total_balance: number;
 }
 
 export interface AccountDocument extends Document, AccountAttributes {

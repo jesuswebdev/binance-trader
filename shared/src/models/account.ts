@@ -21,6 +21,7 @@ export function createAccountSchema(options: SchemaOptions = {}) {
       spot_account_listen_key: { type: String },
       last_spot_account_listen_key_update: { type: Number, default: 0 },
       create_order_after: { type: Number },
+      total_balance: { type: Number },
     },
     { timestamps: true, ...options },
   ).index({ id: 1 }, { unique: true });
