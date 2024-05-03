@@ -207,29 +207,6 @@ services:
     depends_on:
       - account-observer
       - rabbitmq
-  cancel-unfilled-orders-service:
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          cpus: '0.1'
-          memory: 125M
-      restart_policy:
-        <<: *default-restart-policy
-      update_config:
-        <<: *default-update-config
-    healthcheck:
-      <<: *default-healthcheck
-      test: curl --fail http://localhost:3000 || exit 1
-    image: jesuswebdev/binance-trader-cancel-unfilled-orders-service:50d6bbacbdeaa44de788483fc5044e946f7c9441
-    environment:
-      - NODE_ENV=production
-    secrets:
-      - source: cancel-unfilled-orders-service-env-v1
-        target: /usr/app/cancel-unfilled-orders-service/.env.production
-        uid: '1000'
-        gid: '1000'
-        mode: 0700
   update-market-orders-service:
     deploy:
       replicas: 1
@@ -266,8 +243,6 @@ secrets:
   positions-processor-env-v5:
     external: true
   trader-env-v3:
-    external: true
-  cancel-unfilled-orders-service-env-v1:
     external: true
   update-market-orders-service-env-v2:
     external: true
