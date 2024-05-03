@@ -8,9 +8,9 @@ import {
   PositionModel,
   POSITION_SELL_TRIGGER,
   POSITION_STATUS,
+  toSymbolPrecision,
 } from '@binance-trader/shared';
-import { Connection } from 'mongoose';
-import { getTSL } from '../utils/getTrailingStopLoss';
+import { Connection, Types } from 'mongoose';
 import { WAIT_SECONDS_BEFORE_SELLING } from '../config';
 
 export const applyStrategy = async function applyStrategy(
@@ -62,11 +62,6 @@ export const applyStrategy = async function applyStrategy(
       stop_loss: true,
       stop_loss_trigger_time: true,
       take_profit: true,
-      take_profit_trigger_time: true,
-      arm_trailing_stop_loss: true,
-      trailing_stop_loss_armed: true,
-      trailing_stop_loss: true,
-      trailing_stop_loss_trigger_time: true,
       buy_price: true,
     })
     .hint('symbol_1_status_1')
@@ -79,46 +74,36 @@ export const applyStrategy = async function applyStrategy(
   const result = await Promise.all(
     positions.map(async (position) => {
       /**
+       *  =========== UPDATE STOP LOSS ===========
+       */
+
+      if (
+        candle.atr_stop > position.stop_loss &&
+        candle.atr_stop < candle.open_price
+      ) {
+        const newStopLoss = toSymbolPrecision(candle.atr_stop, candle.symbol);
+
+        await positionModel
+          .updateOne(
+            { _id: new Types.ObjectId(position._id) },
+            { $set: { stop_loss: newStopLoss } },
+          )
+          .hint('_id_');
+
+        position.stop_loss = newStopLoss;
+      }
+
+      /**
+       *  =========== END UPDATE STOP LOSS ===========
+       */
+
+      /**
        *  =========== TAKE PROFIT ===========
        */
 
-      // set timer
-      if (
-        +candle.close_price >= position.take_profit &&
-        !position.take_profit_trigger_time
-      ) {
-        await positionModel.findByIdAndUpdate(position._id, {
-          $set: { take_profit_trigger_time: Date.now() },
-        });
-
-        return;
-      }
-
-      const take_profit_time_passed =
-        position.take_profit_trigger_time &&
-        Date.now() - position.take_profit_trigger_time >
-          WAIT_SECONDS_BEFORE_SELLING;
-
-      // remove timer
-      if (
-        position.take_profit_trigger_time &&
-        take_profit_time_passed &&
-        +candle.close_price < position.take_profit
-      ) {
-        await positionModel.findByIdAndUpdate(position._id, {
-          $unset: { take_profit_trigger_time: true },
-        });
-
-        return;
-      }
-
       // execute action
 
-      if (
-        position.take_profit_trigger_time &&
-        take_profit_time_passed &&
-        +candle.close_price >= position.take_profit
-      ) {
+      if (+candle.close_price >= position.take_profit) {
         return {
           position,
           candle,
@@ -180,91 +165,6 @@ export const applyStrategy = async function applyStrategy(
 
       /**
        *  =========== END STOP LOSS ===========
-       */
-
-      /**
-       *  =========== TRAILING STOP LOSS ===========
-       */
-
-      const tsl = getTSL(+candle.close_price, candle.symbol);
-
-      if (
-        +candle.close_price >= position.arm_trailing_stop_loss &&
-        !position.trailing_stop_loss_armed
-      ) {
-        // set trailing stop loss
-        await positionModel.findByIdAndUpdate(position._id, {
-          $set: {
-            trailing_stop_loss_armed: true,
-            trailing_stop_loss: tsl,
-          },
-        });
-
-        return;
-      }
-
-      // set timer
-      if (
-        position.trailing_stop_loss_armed &&
-        +candle.close_price <= position.trailing_stop_loss &&
-        !position.trailing_stop_loss_trigger_time
-      ) {
-        await positionModel.findByIdAndUpdate(position._id, {
-          $set: { trailing_stop_loss_trigger_time: Date.now() },
-        });
-
-        return;
-      }
-
-      const trailing_stop_loss_time_passed =
-        position.trailing_stop_loss_trigger_time &&
-        Date.now() - position.trailing_stop_loss_trigger_time >
-          WAIT_SECONDS_BEFORE_SELLING;
-
-      // remove timer
-      if (
-        position.trailing_stop_loss_armed &&
-        position.trailing_stop_loss_trigger_time &&
-        trailing_stop_loss_time_passed &&
-        +candle.close_price > position.trailing_stop_loss
-      ) {
-        await positionModel.findByIdAndUpdate(position._id, {
-          $unset: { trailing_stop_loss_trigger_time: true },
-        });
-
-        return;
-      }
-
-      // execute action
-
-      if (
-        position.trailing_stop_loss_armed &&
-        position.trailing_stop_loss_trigger_time &&
-        trailing_stop_loss_time_passed &&
-        +candle.close_price <= position.trailing_stop_loss
-      ) {
-        return {
-          position,
-          candle,
-          sell_trigger: POSITION_SELL_TRIGGER.TRAILING_STOP_LOSS,
-        };
-      }
-
-      // set tsl
-
-      // do not update tsl while its looking to sell
-      if (
-        position.trailing_stop_loss_armed &&
-        !position.trailing_stop_loss_trigger_time &&
-        tsl > position.trailing_stop_loss
-      ) {
-        await positionModel.findByIdAndUpdate(position._id, {
-          $set: { trailing_stop_loss: tsl },
-        });
-      }
-
-      /**
-       *  =========== END TRAILING STOP LOSS ===========
        */
 
       return Promise.resolve();
