@@ -12,9 +12,7 @@ import {
   nz,
   OrderAttributes,
   OrderModel,
-  PAIRS,
   PositionModel,
-  POSITION_STATUS,
   SIGNAL_TYPES,
   toSymbolPrecision,
   toSymbolStepPrecision,
@@ -22,10 +20,10 @@ import {
 import { AxiosInstance } from 'axios';
 import { Connection } from 'mongoose';
 import {
-  BINANCE_MINIMUM_ORDER_SIZE,
+  BINANCE_USDT_MINIMUM_ORDER_SIZE,
   BUY_ORDER_TYPE,
-  DEFAULT_BUY_AMOUNT,
   MINUTES_BETWEEN_CANCEL_ATTEMPTS,
+  POSITION_PERCENTAGE_SIZE,
   SELL_ORDER_TYPE,
 } from '../../config';
 import { parseOrder } from '../../utils';
@@ -196,64 +194,26 @@ export async function createBuyOrder({
     (balance) => balance.asset === market.quote_asset,
   );
 
-  // find all positions where base asset = quote asset
-  // sum all quantity and substract that from the balance
-  // that would be the free amount
+  const defaultBuyAmount =
+    (account.total_balance * POSITION_PERCENTAGE_SIZE) / 100;
 
-  const symbolsWithSameBaseAssetAsTheQuoteAsset = PAIRS.filter(
-    (pair) => pair.baseAsset === market.quote_asset,
-  ).map((pair) => pair.symbol);
-
-  const openPositions = await positionModel
-    .find({
-      $and: [
-        { status: POSITION_STATUS.OPEN },
-        { symbol: { $in: symbolsWithSameBaseAssetAsTheQuoteAsset } },
-        { 'buy_order.orderId': { $exists: true } },
-      ],
-    })
-    .select({ buy_order: true })
-    .lean();
-
-  let reservedAmount = 0;
-
-  if (openPositions.length > 0) {
-    const existingOrders = await Promise.all(
-      openPositions.map((position) =>
-        getOrderFromDbOrBinance({
-          database,
-          binance,
-          order: position.buy_order as OrderAttributes,
-        }),
-      ),
+  if (assetBalance.free < BINANCE_USDT_MINIMUM_ORDER_SIZE) {
+    logger.info(
+      { symbol: position.symbol, positionId: position._id },
+      'Unable to create buy order. Reason: Not enough balance',
     );
 
-    for (const existingOrder of existingOrders) {
-      if (!existingOrder) {
-        continue;
-      }
-
-      reservedAmount += +existingOrder.cummulativeQuoteQty;
-    }
+    return;
   }
 
-  const defaultBuyAmount = DEFAULT_BUY_AMOUNT[market.quote_asset];
+  const enoughBalance = assetBalance.free > defaultBuyAmount;
 
-  const enoughBalance = assetBalance.free - reservedAmount > defaultBuyAmount;
   const positionHasBuyOrder = await positionModel.exists({
     $and: [{ id: position.id }, { 'buy_order.orderId': { $exists: true } }],
   });
 
-  if (
-    Date.now() < account.create_order_after ||
-    !enoughBalance ||
-    positionHasBuyOrder
-  ) {
+  if (Date.now() < account.create_order_after || positionHasBuyOrder) {
     let reason = '10s order limit reached.';
-
-    if (!enoughBalance) {
-      reason = 'Not enough balance.';
-    }
 
     if (positionHasBuyOrder) {
       reason = 'Buy order has already been created for this position';
@@ -290,7 +250,9 @@ export async function createBuyOrder({
   };
 
   if (BUY_ORDER_TYPE === BINANCE_ORDER_TYPES.MARKET) {
-    query.quoteOrderQty = defaultBuyAmount.toString();
+    query.quoteOrderQty = (
+      enoughBalance ? defaultBuyAmount : assetBalance.free
+    ).toString();
   }
 
   if (BUY_ORDER_TYPE === BINANCE_ORDER_TYPES.LIMIT) {
@@ -495,14 +457,10 @@ export async function createSellOrder({
       position.symbol,
     );
 
-    if (sellValue < BINANCE_MINIMUM_ORDER_SIZE[market.quote_asset]) {
+    if (sellValue < BINANCE_USDT_MINIMUM_ORDER_SIZE) {
       logger.info(
         { positionId: position._id },
-        `Sell value (${sellValue} ${
-          market.quote_asset
-        }) is below the minimum order size (${
-          BINANCE_MINIMUM_ORDER_SIZE[market.quote_asset]
-        } ${market.quote_asset}).`,
+        `Sell value (${sellValue} ${market.quote_asset}) is below the minimum order size (${BINANCE_USDT_MINIMUM_ORDER_SIZE} ${market.quote_asset}).`,
       );
 
       return;
@@ -733,14 +691,10 @@ export async function createSellOrderForCanceledOrder({
       position.symbol,
     );
 
-    if (sellValue < BINANCE_MINIMUM_ORDER_SIZE[market.quote_asset]) {
+    if (sellValue < BINANCE_USDT_MINIMUM_ORDER_SIZE) {
       logger.info(
         { positionId: position._id, orderId: sell_order.orderId },
-        `Sell value (${sellValue} ${
-          market.quote_asset
-        }) is below the minimum order size (${
-          BINANCE_MINIMUM_ORDER_SIZE[market.quote_asset]
-        } ${market.quote_asset}).`,
+        `Sell value (${sellValue} ${market.quote_asset}) is below the minimum order size (${BINANCE_USDT_MINIMUM_ORDER_SIZE} ${market.quote_asset}).`,
       );
 
       return;

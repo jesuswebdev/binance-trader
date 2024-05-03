@@ -69,6 +69,7 @@ const env = validateObjectSchema(
       {},
     ),
     HEALTHCHECK_PORT: joi.number().port().default(8080),
+    POSITION_PERCENTAGE_SIZE: joi.number().positive().greater(0).required(),
   }),
 );
 
@@ -88,22 +89,14 @@ export const MESSAGE_BROKER_HOST = env.MESSAGE_BROKER_HOST ?? '';
 export const MESSAGE_BROKER_USER = env.MESSAGE_BROKER_USER ?? '';
 export const MESSAGE_BROKER_PASSWORD = env.MESSAGE_BROKER_PASSWORD ?? '';
 
-export const BINANCE_MINIMUM_ORDER_SIZE: Record<string, number> =
-  QUOTE_ASSETS.reduce(
-    (acc, quoteAsset) => ({
-      ...acc,
-      [quoteAsset]: +(env[`BINANCE_${quoteAsset}_MINIMUM_ORDER_SIZE`] ?? 0),
-    }),
-    {} as Record<string, number>,
-  );
-
-export const DEFAULT_BUY_AMOUNT: Record<string, number> = QUOTE_ASSETS.reduce(
-  (acc, quoteAsset) => ({
-    ...acc,
-    [quoteAsset]: +(env[`DEFAULT_${quoteAsset}_BUY_AMOUNT`] ?? 0),
-  }),
-  {} as Record<string, number>,
+export const BINANCE_USDT_MINIMUM_ORDER_SIZE: number = +(
+  env.BINANCE_USDT_MINIMUM_ORDER_SIZE ?? 0
 );
+
+export const DEFAULT_USDT_BUY_AMOUNT: number = +(
+  env.DEFAULT_USDT_BUY_AMOUNT ?? 0
+);
+
 export const BUY_ORDER_TTL = +(env.BUY_ORDER_TTL ?? 0) * MILLISECONDS.SECOND;
 export const SELL_ORDER_TTL = +(env.SELL_ORDER_TTL ?? 0) * MILLISECONDS.SECOND;
 export const MINUTES_BETWEEN_CANCEL_ATTEMPTS =
@@ -117,3 +110,4 @@ export const BUY_ORDER_TYPE = env.BUY_ORDER_TYPE ?? '';
 export const SELL_ORDER_TYPE = env.SELL_ORDER_TYPE ?? '';
 
 export const HEALTHCHECK_PORT = env.HEALTHCHECK_PORT;
+export const POSITION_PERCENTAGE_SIZE = +(env.POSITION_PERCENTAGE_SIZE ?? 0);
