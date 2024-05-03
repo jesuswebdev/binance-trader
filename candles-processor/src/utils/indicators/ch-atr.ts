@@ -23,12 +23,12 @@ export function getCHATR(
   }) as Record<string, number[]>;
 
   const { rma } = calculateRollingMovingAverage(tr, {
-    periods: 10,
+    periods: 7,
     parseFn: nz,
   });
   const atrp = rma.map((range, i) => (range / ohlc.close[i]) * 100);
   const { ema: avg } = calculateExponentialMovingAverage(atrp, {
-    periods: 28,
+    periods: 14,
     parseFn: nz,
   }) as Record<string, number>;
 
