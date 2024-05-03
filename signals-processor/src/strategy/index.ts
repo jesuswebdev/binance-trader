@@ -15,23 +15,13 @@ export const applyStrategy = function applyStrategy(
     return;
   }
 
+  if (last_open_position) {
+    return false;
+  }
+
   const volume = currentCandle.obv > currentCandle.obv_ema;
 
   const volatile = currentCandle.ch_atr > currentCandle.ch_atr_ema;
-
-  const position_prices = [
-    last_open_position?.buy_price ?? 0,
-    last_open_position?.sell_price ?? 0,
-  ].filter((notFalsy) => notFalsy);
-
-  const highest_price = Math.max(0, ...position_prices);
-
-  if (
-    !!highest_price &&
-    currentCandle.close_price > highest_price - currentCandle.atr * 3
-  ) {
-    return;
-  }
 
   const di =
     currentCandle.adx > 20 &&
@@ -57,19 +47,7 @@ export const applyStrategy = function applyStrategy(
     upward_slope &&
     green_candles;
 
-  // more than 5% in the last hour
-  const highestHigh = Math.max(
-    ...candles.slice(-4).map((candle) => candle.high_price),
-    -Infinity,
-  );
-  const lowestLow = Math.min(
-    ...candles.slice(-4).map((candle) => candle.low_price),
-    Infinity,
-  );
-
-  const notARecentPump = 100 - (lowestLow * 100) / highestHigh < 5;
-
-  const triggerSignal = volume && volatile && trending && di && notARecentPump;
+  const triggerSignal = volume && volatile && trending && di;
 
   if (!triggerSignal) {
     return;
