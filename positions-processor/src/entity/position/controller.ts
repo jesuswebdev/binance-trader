@@ -13,11 +13,7 @@ import {
   toSymbolPrecision,
 } from '@binance-trader/shared';
 import { Connection, Types } from 'mongoose';
-import {
-  POSITION_ARM_TRAILING_STOP_LOSS,
-  POSITION_STOP_LOSS,
-  POSITION_TAKE_PROFIT,
-} from '../../config';
+import { POSITION_TAKE_PROFIT } from '../../config';
 import { applyStrategy } from '../../strategy';
 
 type ServicesProps = {
@@ -96,17 +92,9 @@ export const createPosition = async function createPosition({
   const candle = signal.close_candle as CandleAttributes;
 
   const price = signal.price;
-  let stop_loss =
+
+  const stop_loss =
     +candle.atr_stop < price ? +candle.atr_stop : price - +candle.atr * 3;
-
-  const fixedStopLoss = toSymbolPrecision(
-    price * (1 - POSITION_STOP_LOSS / 100),
-    signal.symbol,
-  );
-
-  if (stop_loss < fixedStopLoss) {
-    stop_loss = fixedStopLoss;
-  }
 
   const createdPosition: PositionDocument = await positionModel.create({
     id: `${candle.symbol}_${candle.interval}_${candle.event_time}`,
@@ -119,10 +107,6 @@ export const createPosition = async function createPosition({
       signal.symbol,
     ),
     stop_loss: toSymbolPrecision(stop_loss, signal.symbol),
-    arm_trailing_stop_loss: toSymbolPrecision(
-      price * (1 + POSITION_ARM_TRAILING_STOP_LOSS / 100),
-      signal.symbol,
-    ),
     trigger: signal.trigger,
     signal: signal._id,
     last_stop_loss_update: Date.now(),
