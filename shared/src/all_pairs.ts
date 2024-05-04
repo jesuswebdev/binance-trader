@@ -16,13 +16,6 @@ export const ALL_PAIRS: Pair[] = [
     stepSize: 0.0001,
   },
   {
-    symbol: 'BNBUSDT',
-    quoteAsset: 'USDT',
-    baseAsset: 'BNB',
-    priceTickSize: 0.1,
-    stepSize: 0.001,
-  },
-  {
     symbol: 'LTCUSDT',
     quoteAsset: 'USDT',
     baseAsset: 'LTC',
@@ -86,32 +79,11 @@ export const ALL_PAIRS: Pair[] = [
     stepSize: 0.01,
   },
   {
-    symbol: 'FTMUSDT',
-    quoteAsset: 'USDT',
-    baseAsset: 'FTM',
-    priceTickSize: 0.0001,
-    stepSize: 1,
-  },
-  {
-    symbol: 'ALGOUSDT',
-    quoteAsset: 'USDT',
-    baseAsset: 'ALGO',
-    priceTickSize: 0.0001,
-    stepSize: 1,
-  },
-  {
     symbol: 'DOGEUSDT',
     quoteAsset: 'USDT',
     baseAsset: 'DOGE',
     priceTickSize: 0.00001,
     stepSize: 1,
-  },
-  {
-    symbol: 'XTZUSDT',
-    quoteAsset: 'USDT',
-    baseAsset: 'XTZ',
-    priceTickSize: 0.001,
-    stepSize: 0.1,
   },
   {
     symbol: 'BCHUSDT',
