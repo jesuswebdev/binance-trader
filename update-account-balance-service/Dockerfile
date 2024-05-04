@@ -41,6 +41,6 @@ WORKDIR /usr/app
 COPY --chown=node:node --from=deps ./usr/app/shared/ ./shared/
 COPY --chown=node:node --from=shared-deps ./usr/app/shared/node_modules ./shared/node_modules
 COPY --chown=node:node --from=deps ./usr/app/update-account-balance-service ./update-account-balance-service/
-COPY --chown=node:node --from=build ./usr/app/update-account-balance-service/build/ ./update-account-balance-service/build/
+COPY --chown=node:node --from=build ./usr/app/update-account-balance-service/dist/ ./update-account-balance-service/dist/
 
 CMD [ "node", "./update-account-balance-service/dist/main.js" ]
