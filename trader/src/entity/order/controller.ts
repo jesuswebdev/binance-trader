@@ -295,6 +295,7 @@ export async function createBuyOrder({
     }
   } catch (error: unknown) {
     logger.error(error);
+    throw error;
   } finally {
     await marketModel
       .updateOne({ symbol: position.symbol }, { $set: { trader_lock: false } })
@@ -501,6 +502,7 @@ export async function createSellOrder({
     }
   } catch (error: unknown) {
     logger.error(error);
+    throw error;
   } finally {
     await marketModel
       .updateOne({ symbol: position.symbol }, { $set: { trader_lock: false } })
