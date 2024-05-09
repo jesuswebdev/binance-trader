@@ -29,6 +29,8 @@ class Observer {
   private subscriptionParams: string[];
   private terminating: boolean;
   private broker: MessageBroker<CandleTickData> | undefined;
+  private stats: Record<string, number>;
+  private statsInterval: NodeJS.Timer;
   constructor({ markets, interval }: constructorOptions) {
     this.markets = markets;
     this.interval = interval;
@@ -82,6 +84,8 @@ class Observer {
         date: new Date(kline.t).toISOString(),
       };
 
+      this.updateSymbolStats(candle.symbol);
+
       this.broker?.publish(CANDLE_EVENTS.CANDLE_TICK, candle);
     }
   }
@@ -99,6 +103,8 @@ class Observer {
       if (this.client) {
         this.client.removeAllListeners();
       }
+
+      this.stopStatsInterval();
 
       if (!this.terminating) {
         this.init();
@@ -141,6 +147,8 @@ class Observer {
   async init() {
     logger.info('Starting Markets Observer');
 
+    this.initializeStatsInterval();
+
     this.broker = new MessageBroker<CandleTickData>({
       exchange: EXCHANGE_TYPES.MAIN,
       connectionOptions: {
@@ -175,6 +183,26 @@ class Observer {
     });
 
     logger.info('Markets Observer started');
+  }
+
+  private initializeStatsInterval() {
+    this.statsInterval = setInterval(
+      () => {
+        logger.info(this.stats, 'Last hour stats');
+
+        // reset stats
+        this.stats = {};
+      },
+      1000 * 60 * 60,
+    );
+  }
+
+  private stopStatsInterval() {
+    clearInterval(this.statsInterval);
+  }
+
+  private updateSymbolStats(symbol: string) {
+    this.stats[symbol] = (this.stats[symbol] ?? 0) + 1;
   }
 }
 
