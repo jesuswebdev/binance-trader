@@ -40,6 +40,7 @@ class Observer {
     );
     this.client = null;
     this.terminating = false;
+    this.stats = {};
   }
 
   private onConnectionOpen() {
@@ -128,6 +129,7 @@ class Observer {
           }),
           (error) => {
             if (error) {
+              logger.error(error);
               throw error;
             }
             client.terminate();
@@ -161,6 +163,8 @@ class Observer {
 
     await this.broker.initializeConnection();
 
+    logger.info('Broker connection initialized');
+
     this.client = new ws(
       `${BINANCE_STREAM_URI}/stream?streams=${this.markets
         .map((market) => `${market.symbol}@kline_${this.interval}`)
@@ -189,6 +193,14 @@ class Observer {
     this.statsInterval = setInterval(
       () => {
         logger.info(this.stats, 'Last hour stats');
+
+        if (Object.keys(this.stats).length === 0) {
+          logger.info(
+            'Did not receive candles updates in the last hour. Terminating container',
+          );
+
+          this.terminate('error');
+        }
 
         // reset stats
         this.stats = {};
