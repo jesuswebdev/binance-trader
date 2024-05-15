@@ -14,7 +14,8 @@ export class AppService {
   async getStats() {
     const markets = await this.marketModel
       .find()
-      .select(['symbol', 'last_price', 'updatedAt']);
+      .select(['symbol', 'last_price', 'updatedAt'])
+      .lean();
 
     const topN: { _id: string; candles: CandleDocument[] }[] =
       await this.candleModel
