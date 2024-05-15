@@ -24,6 +24,8 @@ import { APP_GUARD } from '@nestjs/core';
       useFactory: (configService: ConfigService) => ({
         uri: `${configService.get('DATABASE_PROTOCOL')}://${configService.get('DATABASE_USERNAME')}:${configService.get('DATABASE_PASSWORD')}@${configService.get('DATABASE_HOST')}/${configService.get('DATABASE_NAME')}`,
         authSource: 'admin',
+        minPoolSize: 1,
+        maxPoolSize: 3,
       }),
     }),
     MongooseModule.forFeature([
