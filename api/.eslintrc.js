@@ -1,0 +1,38 @@
+module.exports = {
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    project: 'tsconfig.json',
+    tsconfigRootDir: __dirname,
+    sourceType: 'module',
+  },
+  plugins: ['@typescript-eslint/eslint-plugin'],
+  extends: [
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
+  ],
+  root: true,
+  env: {
+    node: true,
+    jest: true,
+  },
+  ignorePatterns: ['.eslintrc.js'],
+  rules: {
+    '@typescript-eslint/interface-name-prefix': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    'require-await': 'error',
+    'no-return-await': 'error',
+    eqeqeq: 'error',
+    curly: 'error',
+    'no-else-return': 'error',
+    'no-lonely-if': 'error',
+    'no-multi-assign': 'error',
+    'no-nested-ternary': 'error',
+    'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
+    'no-param-reassign': 'error',
+    'no-unneeded-ternary': 'error',
+    'max-params': ['error', 3],
+    'id-length': [2, { exceptions: ['h', 'i', 'j', '_'], properties: 'never' }],
+  },
+};
