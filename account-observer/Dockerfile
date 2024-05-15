@@ -24,7 +24,7 @@ FROM node:16.15.1 as build
 WORKDIR /usr/app
 COPY --from=deps ./usr/app/ .
 COPY ./account-observer/ ./account-observer/
-ENV NODE_ENV production
+
 RUN npm install --include=dev --omit=peer --omit=optional --prefix ./account-observer \
     && npm cache clean --force \
     && npm run build --prefix ./account-observer

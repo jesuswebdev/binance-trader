@@ -25,7 +25,7 @@ FROM node:16.15.1 as build
 WORKDIR /usr/app
 COPY --from=deps ./usr/app/ .
 COPY ./candles-processor/ ./candles-processor/
-ENV NODE_ENV production
+
 RUN npm install --include=dev --omit=peer --omit=optional --prefix ./candles-processor \
     && npm cache clean --force \
     && npm run build --prefix ./candles-processor

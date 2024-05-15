@@ -24,7 +24,7 @@ FROM node:20.12.0 as build
 WORKDIR /usr/app
 COPY --from=deps ./usr/app/ .
 COPY ./update-account-balance-service/ ./update-account-balance-service/
-ENV NODE_ENV production
+
 RUN npm install --include=dev --omit=peer --omit=optional --prefix ./update-account-balance-service \
     && npm cache clean --force \
     && npm run build --prefix ./update-account-balance-service

@@ -24,7 +24,7 @@ FROM node:16.15.1 as build
 WORKDIR /usr/app
 COPY --from=deps ./usr/app/ .
 COPY ./signals-processor/ ./signals-processor/
-ENV NODE_ENV production
+
 RUN npm install --include=dev --omit=peer --omit=optional --prefix ./signals-processor \
     && npm cache clean --force \
     && npm run build --prefix ./signals-processor
