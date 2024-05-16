@@ -1,0 +1,109 @@
+version: "3.4"
+
+x-default-healthcheck: &default-healthcheck
+  test: curl --fail http://localhost:80 || exit 1
+  interval: 60s
+  timeout: 10s
+  retries: 5
+  start_period: 60s
+
+x-default-restart-policy: &default-restart-policy
+  condition: any
+  delay: 30s
+  window: 120s
+
+x-default-update-config: &default-update-config
+  parallelism: 1
+  delay: 30s
+  failure_action: rollback
+
+services:
+  api:
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 100M
+      restart_policy:
+        <<: *default-restart-policy
+      update_config:
+        <<: *default-update-config
+    healthcheck:
+      <<: *default-healthcheck
+      test: curl --fail http://localhost:3000/api/v1/healthz || exit 1
+    image: jesuswebdev/binance-trader-api:a7b35eb7648ec75cdfb60cccc679501682de974c
+    environment:
+      - NODE_ENV=production
+    secrets:
+      - source: api-env-v1
+        target: /usr/app/api/.env.production
+        uid: '1000'
+        gid: '1000'
+        mode: 0700
+    networks:
+      - backend
+  
+  web:
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 50M
+      restart_policy:
+        <<: *default-restart-policy
+      update_config:
+        <<: *default-update-config
+    healthcheck:
+      <<: *default-healthcheck
+      test: curl --fail http://localhost:80 || exit 1
+    depends_on:
+      - api
+    image: jesuswebdev/binance-trader-web:35b8a8cc8b47ee67b9e041488207faf5db4be0d0
+    networks:
+      - frontend
+  
+  
+  reverse-proxy:
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 50M
+      restart_policy:
+        <<: *default-restart-policy
+      update_config:
+        <<: *default-update-config
+    healthcheck:
+      <<: *default-healthcheck
+      test: curl --fail http://localhost/ping || exit 1
+    image: nginx:alpine
+    secrets:
+      - source: nginx-conf-v2
+        target: /etc/nginx/nginx.conf
+        uid: '1000'
+        gid: '1000'
+        mode: 0700
+    networks:
+      - backend
+      - frontend
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+    depends_on:
+      - api
+      - web
+
+networks:
+  backend:
+  frontend:
+
+secrets:
+  api-env-v1:
+    external: true
+  nginx-conf-v2:
+    external: true

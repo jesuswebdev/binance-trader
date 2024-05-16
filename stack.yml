@@ -65,7 +65,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-account-observer:e40b84199dce6d1e9796ce376faae07188c32571
+    image: jesuswebdev/binance-trader-account-observer:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
     environment:
       - NODE_ENV=production
     secrets:
@@ -114,7 +114,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-candles-processor:e40b84199dce6d1e9796ce376faae07188c32571
+    image: jesuswebdev/binance-trader-candles-processor:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
     environment:
       - NODE_ENV=production
     secrets:
@@ -142,7 +142,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-signals-processor:e40b84199dce6d1e9796ce376faae07188c32571
+    image: jesuswebdev/binance-trader-signals-processor:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
     environment:
       - NODE_ENV=production
     secrets:
@@ -169,7 +169,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-positions-processor:e40b84199dce6d1e9796ce376faae07188c32571
+    image: jesuswebdev/binance-trader-positions-processor:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
     environment:
       - NODE_ENV=production
     secrets:
@@ -195,7 +195,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-trader:e40b84199dce6d1e9796ce376faae07188c32571
+    image: jesuswebdev/binance-trader-trader:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
     environment:
       - NODE_ENV=production
     secrets:
@@ -221,7 +221,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:3000 || exit 1
-    image: jesuswebdev/binance-trader-update-account-balance-service:e40b84199dce6d1e9796ce376faae07188c32571
+    image: jesuswebdev/binance-trader-update-account-balance-service:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
     environment:
       - NODE_ENV=production
     secrets:
@@ -230,68 +230,6 @@ services:
         uid: '1000'
         gid: '1000'
         mode: 0700
-  
-
-  api:
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          cpus: '0.10'
-          memory: 100M
-      restart_policy:
-        <<: *default-restart-policy
-      update_config:
-        <<: *default-update-config
-    healthcheck:
-      <<: *default-healthcheck
-      test: curl --fail http://localhost:3000/api/v1/healthz || exit 1
-    image: jesuswebdev/binance-trader-api:e40b84199dce6d1e9796ce376faae07188c32571
-    environment:
-      - NODE_ENV=production
-    secrets:
-    - source: api-env-v1
-      target: /usr/app/api/.env.production
-      uid: '1000'
-      gid: '1000'
-      mode: 0700
-    networks:
-      - backend
-  
-  
-  reverse-proxy:
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          cpus: '0.10'
-          memory: 50M
-      restart_policy:
-        <<: *default-restart-policy
-      update_config:
-        <<: *default-update-config
-    healthcheck:
-      <<: *default-healthcheck
-      test: curl --fail http://localhost/ping || exit 1
-    image: nginx:alpine
-    secrets:
-      - source: nginx-conf-v1
-        target: /etc/nginx/nginx.conf
-        uid: '1000'
-        gid: '1000'
-        mode: 0700
-    networks:
-      - backend
-      - frontend
-    ports:
-      - target: 80
-        published: 80
-        protocol: tcp
-        mode: host
-
-networks:
-  backend:
-  frontend:
 
 secrets:
   markets-observer-env-v1:
@@ -307,8 +245,4 @@ secrets:
   trader-env-v1:
     external: true
   update-account-balance-service-env-v1:
-    external: true
-  api-env-v1:
-    external: true
-  nginx-conf-v1:
     external: true
