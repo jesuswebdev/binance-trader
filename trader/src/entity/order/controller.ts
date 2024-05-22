@@ -194,8 +194,12 @@ export async function createBuyOrder({
     (balance) => balance.asset === market.quote_asset,
   );
 
-  const defaultBuyAmount =
-    (account.total_balance * POSITION_PERCENTAGE_SIZE) / 100;
+  const defaultBuyAmount = +(
+    (account.total_balance * POSITION_PERCENTAGE_SIZE) /
+    100
+  )
+    .toFixed(8)
+    .replace(/\.0+$/, '');
 
   if (assetBalance.free < BINANCE_USDT_MINIMUM_ORDER_SIZE) {
     logger.info(
