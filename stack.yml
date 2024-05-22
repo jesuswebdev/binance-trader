@@ -18,39 +18,6 @@ x-default-update-config: &default-update-config
   failure_action: rollback
 
 services:
-  rabbitmq:
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 300M
-      restart_policy:
-        <<: *default-restart-policy
-      update_config:
-        <<: *default-update-config
-    healthcheck:
-      <<: *default-healthcheck
-      test: rabbitmq-diagnostics -q ping || exit 1
-    image: rabbitmq:3-management
-    environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=password
-  redis:
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          cpus: '0.10'
-          memory: 50M
-      restart_policy:
-        <<: *default-restart-policy
-      update_config:
-        <<: *default-update-config
-    healthcheck:
-      <<: *default-healthcheck
-      test: redis-cli ping || exit 1
-    image: redis:7
   account-observer:
     deploy:
       replicas: 1
@@ -65,7 +32,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-account-observer:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
+    image: jesuswebdev/binance-trader-account-observer:e40b84199dce6d1e9796ce376faae07188c32571
     environment:
       - NODE_ENV=production
     secrets:
@@ -99,6 +66,7 @@ services:
         mode: 0700
     depends_on:
       - candles-processor
+    networks:
       - rabbitmq
   candles-processor:
     deploy:
@@ -114,7 +82,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-candles-processor:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
+    image: jesuswebdev/binance-trader-candles-processor:e40b84199dce6d1e9796ce376faae07188c32571
     environment:
       - NODE_ENV=production
     secrets:
@@ -126,8 +94,9 @@ services:
     depends_on:
       - signals-processor
       - positions-processor
-      - rabbitmq
+    networks:
       - redis
+      - rabbitmq
   signals-processor:
     deploy:
       replicas: 1
@@ -142,7 +111,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-signals-processor:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
+    image: jesuswebdev/binance-trader-signals-processor:e40b84199dce6d1e9796ce376faae07188c32571
     environment:
       - NODE_ENV=production
     secrets:
@@ -153,8 +122,9 @@ services:
         mode: 0700
     depends_on:
       - positions-processor
-      - rabbitmq
+    networks:
       - redis
+      - rabbitmq
   positions-processor:
     deploy:
       replicas: 1
@@ -169,7 +139,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-positions-processor:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
+    image: jesuswebdev/binance-trader-positions-processor:cd7b8a479decb30881a565c4a0e1ee4d247c8977
     environment:
       - NODE_ENV=production
     secrets:
@@ -180,6 +150,7 @@ services:
         mode: 0700
     depends_on:
       - trader
+    networks:
       - rabbitmq
   trader:
     deploy:
@@ -195,17 +166,18 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-trader:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
+    image: jesuswebdev/binance-trader-trader:75796cd68e5361b91eb7337b8f50c914793ec238
     environment:
       - NODE_ENV=production
     secrets:
-      - source: trader-env-v1
+      - source: trader-env-v2
         target: /usr/app/trader/.env.production
         uid: '1000'
         gid: '1000'
         mode: 0700
     depends_on:
       - account-observer
+    networks:
       - rabbitmq
   update-account-balance-service:
     deploy:
@@ -221,7 +193,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:3000 || exit 1
-    image: jesuswebdev/binance-trader-update-account-balance-service:bf9d68d30c911c0fad2472fcb9bdb87a699e3f47
+    image: jesuswebdev/binance-trader-update-account-balance-service:e2ff9630a0e18644128c42668b82ed03724fd3e4
     environment:
       - NODE_ENV=production
     secrets:
@@ -230,6 +202,15 @@ services:
         uid: '1000'
         gid: '1000'
         mode: 0700
+    networks:
+      - redis
+      - rabbitmq
+
+networks:
+  redis:
+    external: true
+  rabbitmq:
+    external: true
 
 secrets:
   markets-observer-env-v1:
@@ -242,7 +223,7 @@ secrets:
     external: true
   positions-processor-env-v1:
     external: true
-  trader-env-v1:
+  trader-env-v2:
     external: true
   update-account-balance-service-env-v1:
     external: true

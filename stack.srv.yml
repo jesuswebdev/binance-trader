@@ -1,0 +1,63 @@
+version: "3.4"
+
+x-default-healthcheck: &default-healthcheck
+  test: curl --fail http://localhost:80 || exit 1
+  interval: 60s
+  timeout: 10s
+  retries: 5
+  start_period: 60s
+
+x-default-restart-policy: &default-restart-policy
+  condition: any
+  delay: 30s
+  window: 120s
+
+x-default-update-config: &default-update-config
+  parallelism: 1
+  delay: 30s
+  failure_action: rollback
+
+services:
+  rabbitmq:
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 300M
+      restart_policy:
+        <<: *default-restart-policy
+      update_config:
+        <<: *default-update-config
+    healthcheck:
+      <<: *default-healthcheck
+      test: rabbitmq-diagnostics -q ping || exit 1
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=password
+    networks:
+      - rabbitmq
+  redis:
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 50M
+      restart_policy:
+        <<: *default-restart-policy
+      update_config:
+        <<: *default-update-config
+    healthcheck:
+      <<: *default-healthcheck
+      test: redis-cli ping || exit 1
+    image: redis:7
+    networks:
+      - redis
+
+networks:
+  redis:
+    external: true
+  rabbitmq:
+    external: true
