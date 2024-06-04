@@ -38,6 +38,7 @@ services:
       - RABBITMQ_DEFAULT_PASS=password
     networks:
       - rabbitmq
+      - uptime-kuma
   redis:
     deploy:
       replicas: 1
@@ -55,9 +56,12 @@ services:
     image: redis:7
     networks:
       - redis
+      - uptime-kuma
 
 networks:
   redis:
     external: true
   rabbitmq:
+    external: true
+  uptime-kuma:
     external: true

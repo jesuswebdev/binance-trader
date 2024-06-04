@@ -41,6 +41,8 @@ services:
         uid: '1000'
         gid: '1000'
         mode: 0700
+    networks:
+      - uptime-kuma
   markets-observer:
     deploy:
       replicas: 1
@@ -68,6 +70,7 @@ services:
       - candles-processor
     networks:
       - rabbitmq
+      - uptime-kuma
   candles-processor:
     deploy:
       replicas: 1
@@ -97,6 +100,7 @@ services:
     networks:
       - redis
       - rabbitmq
+      - uptime-kuma
   signals-processor:
     deploy:
       replicas: 1
@@ -125,6 +129,7 @@ services:
     networks:
       - redis
       - rabbitmq
+      - uptime-kuma
   positions-processor:
     deploy:
       replicas: 1
@@ -152,6 +157,7 @@ services:
       - trader
     networks:
       - rabbitmq
+      - uptime-kuma
   trader:
     deploy:
       replicas: 1
@@ -166,7 +172,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:8080 || exit 1
-    image: jesuswebdev/binance-trader-trader:75796cd68e5361b91eb7337b8f50c914793ec238
+    image: jesuswebdev/binance-trader-trader:3b1c298dafbe4defef3f393ea2f8d8ec2adbab94
     environment:
       - NODE_ENV=production
     secrets:
@@ -179,6 +185,7 @@ services:
       - account-observer
     networks:
       - rabbitmq
+      - uptime-kuma
   update-account-balance-service:
     deploy:
       replicas: 1
@@ -205,11 +212,14 @@ services:
     networks:
       - redis
       - rabbitmq
+      - uptime-kuma
 
 networks:
   redis:
     external: true
   rabbitmq:
+    external: true
+  uptime-kuma:
     external: true
 
 secrets:
