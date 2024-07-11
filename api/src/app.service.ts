@@ -67,7 +67,11 @@ export class AppService {
           green_candles: latestCandles
             .slice(-0, 2)
             .every((candle) => candle.ha_close > candle.ha_open),
-          trend: latestCandles[0].trend === 1 && latestCandles[1].trend === 1,
+          trend:
+            latestCandles[0].trend === 1 &&
+            latestCandles[1].trend === 1 &&
+            latestCandles[0].volume_trend === 1 &&
+            latestCandles[1].volume_trend === 1,
           mesa:
             latestCandles[0].mama > latestCandles[0].fama &&
             latestCandles[1].mama > latestCandles[1].fama,
