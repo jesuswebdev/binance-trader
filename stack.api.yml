@@ -32,7 +32,7 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: curl --fail http://localhost:3000/api/v1/healthz || exit 1
-    image: jesuswebdev/binance-trader-api:a7b35eb7648ec75cdfb60cccc679501682de974c
+    image: jesuswebdev/binance-trader-api:1fb0923bd28b31f17f9f1717024562eedcc78d05
     environment:
       - NODE_ENV=production
     secrets:
