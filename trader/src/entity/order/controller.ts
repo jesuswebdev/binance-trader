@@ -17,7 +17,7 @@ import {
   toSymbolPrecision,
   toSymbolStepPrecision,
 } from '@binance-trader/shared';
-import { AxiosInstance } from 'axios';
+import { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import { Connection } from 'mongoose';
 import {
   BINANCE_USDT_MINIMUM_ORDER_SIZE,
@@ -479,10 +479,29 @@ export async function createSellOrder({
       'Attempting to create sell order',
     );
 
-    const searchParams = new URLSearchParams(query).toString();
-    const { data, headers } = await binance.post(
-      `/api/v3/order?${searchParams}`,
-    );
+    // eslint-disable-next-line
+    let axiosResponse: AxiosResponse<any, any>;
+
+    try {
+      const searchParams = new URLSearchParams(query).toString();
+      axiosResponse = await binance.post(`/api/v3/order?${searchParams}`);
+    } catch (error: unknown) {
+      logger.error(
+        { positionId: position._id, query },
+        'There was an error creating the sell order',
+      );
+
+      if (nz((error as AxiosError).response?.status) >= 400) {
+        await checkHeaders(
+          (error as AxiosError).response?.headers as Record<string, string>,
+          accountModel,
+        );
+      }
+
+      throw error;
+    }
+
+    const { data, headers } = axiosResponse;
 
     await checkHeaders(headers, accountModel);
 
