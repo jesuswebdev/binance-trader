@@ -61,7 +61,7 @@ services:
     environment:
       - NODE_ENV=production
     secrets:
-      - source: markets-observer-env-v1
+      - source: markets-observer-env-v2
         target: /usr/app/markets-observer/.env.production
         uid: '1000'
         gid: '1000'
@@ -89,7 +89,7 @@ services:
     environment:
       - NODE_ENV=production
     secrets:
-      - source: candles-processor-env-v1
+      - source: candles-processor-env-v2
         target: /usr/app/candles-processor/.env.production
         uid: '1000'
         gid: '1000'
@@ -148,7 +148,7 @@ services:
     environment:
       - NODE_ENV=production
     secrets:
-      - source: positions-processor-env-v1
+      - source: positions-processor-env-v2
         target: /usr/app/positions-processor/.env.production
         uid: '1000'
         gid: '1000'
@@ -223,15 +223,15 @@ networks:
     external: true
 
 secrets:
-  markets-observer-env-v1:
+  markets-observer-env-v2:
     external: true
   account-observer-env-v1:
     external: true
-  candles-processor-env-v1:
+  candles-processor-env-v2:
     external: true
   signals-processor-env-v1:
     external: true
-  positions-processor-env-v1:
+  positions-processor-env-v2:
     external: true
   trader-env-v2:
     external: true
