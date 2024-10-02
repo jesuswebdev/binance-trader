@@ -160,11 +160,11 @@ services:
       - uptime-kuma
   trader:
     deploy:
-      replicas: 1
+      replicas: 2
       resources:
         limits:
           cpus: '0.15'
-          memory: 150M
+          memory: 100M
       restart_policy:
         <<: *default-restart-policy
       update_config:
