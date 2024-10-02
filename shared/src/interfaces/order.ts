@@ -22,8 +22,14 @@ export interface OrderAttributes {
   eventTime: number;
   transactTime: number;
   lastCancelAttempt: number;
+  fills: {
+    price: string;
+    qty: string;
+    commission: string;
+    commissionAsset: string;
+    tradeId: number;
+  }[];
 }
-
 export interface OrderDocument extends Document, OrderAttributes {
   id: string;
   _id: Types.ObjectId;

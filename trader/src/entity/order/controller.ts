@@ -444,12 +444,10 @@ export async function createSellOrder({
       return;
     }
 
-    const quantity_to_sell =
-      nz(+buy_order.executedQty) -
-      (position.symbol.replace(market.quote_asset, '') ===
-      buy_order.commissionAsset
-        ? nz(+buy_order.commissionAmount)
-        : 0);
+    const quantity_to_sell = getSellOrderQuantityToSell(
+      buy_order,
+      market.quote_asset,
+    );
 
     if (quantity_to_sell === 0) {
       logger.info(`Buy order for position '${position._id}' was not filled.`);
@@ -512,6 +510,35 @@ export async function createSellOrder({
       .updateOne({ symbol: position.symbol }, { $set: { trader_lock: false } })
       .hint('symbol_1');
   }
+}
+
+function getSellOrderQuantityToSell(
+  buy_order: OrderAttributes,
+  quoteAsset: string,
+): number {
+  const executedQty = nz(+buy_order.executedQty);
+  const orderAsset = buy_order.symbol.replace(quoteAsset, '');
+
+  const usingAssetAsCommission =
+    buy_order.commissionAsset === orderAsset ||
+    (buy_order.fills || []).some((fill) => fill.commissionAsset === orderAsset);
+
+  let commissionAmmount = 0;
+
+  if (usingAssetAsCommission) {
+    if (buy_order.commissionAmount) {
+      commissionAmmount = nz(+buy_order.commissionAmount);
+    } else {
+      commissionAmmount = (buy_order.fills || []).reduce(
+        (acc, fill) =>
+          acc +
+          (fill?.commissionAsset === orderAsset ? nz(+fill.commission) : 0),
+        0,
+      );
+    }
+  }
+
+  return executedQty - commissionAmmount;
 }
 
 type CreateSellOrderForCanceledOrderProps = Omit<ServicesProps, 'broker'> & {
