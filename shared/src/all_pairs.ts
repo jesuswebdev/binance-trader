@@ -47,7 +47,7 @@ export const ALL_PAIRS: Pair[] = [
     symbol: 'TRXUSDT',
     quoteAsset: 'USDT',
     baseAsset: 'TRX',
-    priceTickSize: 0.00001,
+    priceTickSize: 0.0001,
     stepSize: 0.1,
   },
   {
@@ -61,15 +61,8 @@ export const ALL_PAIRS: Pair[] = [
     symbol: 'LINKUSDT',
     quoteAsset: 'USDT',
     baseAsset: 'LINK',
-    priceTickSize: 0.001,
+    priceTickSize: 0.01,
     stepSize: 0.01,
-  },
-  {
-    symbol: 'MATICUSDT',
-    quoteAsset: 'USDT',
-    baseAsset: 'MATIC',
-    priceTickSize: 0.0001,
-    stepSize: 0.1,
   },
   {
     symbol: 'ATOMUSDT',
@@ -97,7 +90,7 @@ export const ALL_PAIRS: Pair[] = [
     quoteAsset: 'USDT',
     baseAsset: 'SOL',
     priceTickSize: 0.01,
-    stepSize: 0.01,
+    stepSize: 0.001,
   },
   {
     symbol: 'DOTUSDT',
