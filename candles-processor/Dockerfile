@@ -1,19 +1,19 @@
-FROM node:16.15.1 as shared
+FROM node:16.15.1 AS shared
 WORKDIR /usr/app
 COPY ./shared ./shared/
-ENV NODE_ENV production
+ENV NODE_ENV=production
 RUN npm install --include=dev --prefix ./shared \
     && npm run build --prefix ./shared \
     && npm cache clean --force 
 
-FROM node:16.15.1 as shared-deps
+FROM node:16.15.1 AS shared-deps
 WORKDIR /usr/app
 COPY --from=shared ./usr/app/shared/package*.json ./shared/
 RUN npm ci --only=production --prefix ./shared \
     && npm cache clean --force
     
 
-FROM node:16.15.1 as deps
+FROM node:16.15.1 AS deps
 WORKDIR /usr/app
 COPY ./candles-processor/package*.json ./candles-processor/
 COPY --from=shared ./usr/app/shared/package.json ./shared/
@@ -21,7 +21,7 @@ COPY --from=shared ./usr/app/shared/build/ ./shared/build/
 RUN npm ci --only=production --prefix ./candles-processor \
     && npm cache clean --force
 
-FROM node:16.15.1 as build
+FROM node:16.15.1 AS build
 WORKDIR /usr/app
 COPY --from=deps ./usr/app/ .
 COPY ./candles-processor/ ./candles-processor/
@@ -32,7 +32,7 @@ RUN npm install --include=dev --omit=peer --omit=optional --prefix ./candles-pro
 
 FROM node:16.15.1
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 RUN mkdir /usr/app && chown -R node:node /usr/app
 

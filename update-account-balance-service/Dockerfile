@@ -1,18 +1,18 @@
-FROM node:20.12.0 as shared
+FROM node:20.12.0 AS shared
 WORKDIR /usr/app
 COPY ./shared ./shared/
-ENV NODE_ENV production
+ENV NODE_ENV=production
 RUN npm install --include=dev --prefix ./shared \
     && npm run build --prefix ./shared \
     && npm cache clean --force
     
-FROM node:20.12.0 as shared-deps
+FROM node:20.12.0 AS shared-deps
 WORKDIR /usr/app
 COPY --from=shared ./usr/app/shared/package*.json ./shared/
 RUN npm ci --only=production --prefix ./shared \
     && npm cache clean --force
 
-FROM node:20.12.0 as deps
+FROM node:20.12.0 AS deps
 WORKDIR /usr/app
 COPY ./update-account-balance-service/package*.json ./update-account-balance-service/
 COPY --from=shared ./usr/app/shared/package.json ./shared/
@@ -20,7 +20,7 @@ COPY --from=shared ./usr/app/shared/build/ ./shared/build/
 RUN npm ci --only=production --prefix ./update-account-balance-service \
     && npm cache clean --force
 
-FROM node:20.12.0 as build
+FROM node:20.12.0 AS build
 WORKDIR /usr/app
 COPY --from=deps ./usr/app/ .
 COPY ./update-account-balance-service/ ./update-account-balance-service/
@@ -31,7 +31,7 @@ RUN npm install --include=dev --omit=peer --omit=optional --prefix ./update-acco
 
 FROM node:20.12.0
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 RUN mkdir /usr/app && chown -R node:node /usr/app
 

@@ -1,4 +1,4 @@
-FROM node:20.12.0 as build
+FROM node:20.12.0 AS build
 WORKDIR /usr/app
 COPY ./web/ ./web/
 RUN npm install --include=dev --omit=peer --omit=optional --legacy-peer-deps --prefix ./web \
